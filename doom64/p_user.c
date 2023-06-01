@@ -568,6 +568,7 @@ void P_DeathThink (player_t *player) // 80022914
     {
         player->messagetic = MSGTICS;
         player->message = mockstrings[P_Random() % 12];
+		player->messagecolor = 0xffffff00;
         deathmocktics = ticon;
     }
 
@@ -615,6 +616,7 @@ void P_PlayerInSpecialSector (player_t *player, sector_t *sec) // 80022B1C
         player->secretcount++;
         player->message = "You found a secret area!";
         player->messagetic = MSGTICS;
+		player->messagecolor = 0xffff0000;
         sec->flags &= ~MS_SECRET;
     }
 

@@ -236,7 +236,7 @@ void ST_Drawer (void) // 80029DC0
         if (ms_alpha >= 255)
             ms_alpha = 255;
 
-        ST_Message(20, 20, players[0].message, ms_alpha | 0xffffff00);
+        ST_Message(20, 20, players[0].message, ms_alpha | players[0].messagecolor);
     }
 
     if (enable_statusbar)

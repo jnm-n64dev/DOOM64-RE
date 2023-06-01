@@ -454,6 +454,7 @@ typedef struct player_s
 	int			killcount, itemcount, secretcount;		/* for intermission */
 	char		*message;				/* hint messages */
 	int         messagetic;             /* messages tic countdown*/
+	int			messagecolor;			/* message color */
 	int			damagecount, bonuscount;/* for screen flashing */
 	int			bfgcount;               /* for bfg screen flashing */
 	mobj_t		*attacker;				/* who did damage (NULL for floors) */

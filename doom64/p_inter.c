@@ -272,6 +272,7 @@ void P_TouchSpecialThing (mobj_t *special, mobj_t *toucher) // 80014810
 	fixed_t		delta;
 	int			sound;
 	char        *message;
+	int			messagecolor = 0xffffff00;
 	int         artflag;
 
 	delta = special->z - toucher->z;
@@ -573,6 +574,7 @@ void P_TouchSpecialThing (mobj_t *special, mobj_t *toucher) // 80014810
         else /* ART_DOUBLE */
             message = "It must do something...";
 
+		messagecolor = 0xff000000;
         sound = sfx_powerup;
 		break;
 
@@ -592,6 +594,7 @@ void P_TouchSpecialThing (mobj_t *special, mobj_t *toucher) // 80014810
     {
         player->message = message;
         player->messagetic = MSGTICS;
+		player->messagecolor = messagecolor;
     }
 
 	if (special->flags & MF_COUNTITEM)
