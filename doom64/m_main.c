@@ -48,7 +48,7 @@ char *ControlText[] =   //8007517C
 #define M_TXT16 "Bring it on!"
 #define M_TXT17 "I own Doom!"
 #define M_TXT18 "Watch me die!"
-#define M_TXT19 "Nightmare!"
+#define M_TXT19 "Hardcore!"
 #define M_TXT20 "Yes"
 #define M_TXT21 "No"
 #define M_TXT22 "Features"
@@ -1054,7 +1054,7 @@ int M_MenuTicker(void) // 80007E0C
                         itemlines = 4;
                         #endif // ENABLE_NIGHTMARE
                         MenuCall = M_MenuTitleDrawer;
-                        cursorpos = 1;  // Set Default Bring it on!
+                        cursorpos = 2;
 
                         exit = MiniLoop(M_FadeInStart, M_MenuClearCall, M_MenuTicker, M_MenuGameDrawer);
                         M_RestoreMenuData((exit == ga_exit));
