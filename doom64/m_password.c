@@ -25,6 +25,7 @@ char *passFeatures[3] =
     "k41s3r?w4s?h3r3?"
 };
 
+#define MAPUP       0x20
 // [GEC] NEW FLAGS
 #define NIGHTMARE	0x40
 
@@ -156,7 +157,10 @@ void M_EncodePassword(byte *buff) // 8000BC10
         encode[5] |= NIGHTMARE;
     }
     #endif // ENABLE_NIGHTMARE
-
+    if (nextmap >= 64)
+    {
+        encode[5] |= MAPUP;
+    }
     decodebit[0] = (*(short*)&encode[0]);
     decodebit[1] = (*(short*)&encode[2]);
     decodebit[2] = (*(short*)&encode[4]);
@@ -321,6 +325,12 @@ int M_DecodePassword(byte *inbuff, int *levelnum, int *skill, player_t *player) 
     // Get Map
     //
     *levelnum = (decode[0] >> 2);
+
+    if (decode[5] & MAPUP)
+    {
+        decode[5] &= ~MAPUP;
+        *levelnum |= 64;
+    }
 
     //
     // Verify Map
