@@ -484,7 +484,6 @@ typedef struct player_s
 
 #define CF_NOCOLORS     0x20000    // [GEC] NEW CHEAT CODE
 #define CF_FULLBRIGHT   0x40000    // [GEC] NEW CHEAT CODE
-#define CF_FILTER       0x80000    // [GEC] NEW CHEAT CODE
 
 #define	AF_LINES		1				/* automap active on lines mode */
 #define	AF_SUBSEC		2               /* automap active on subsector mode */
@@ -796,6 +795,7 @@ extern int MusVolume;               // 8005A7C4
 extern int brightness;              // 8005A7C8
 extern int M_SENSITIVITY;           // 8005A7CC
 extern boolean FeaturesUnlocked;    // 8005A7D0
+extern int TextureFilter;
 
 int M_RunTitle(void); // 80007630
 

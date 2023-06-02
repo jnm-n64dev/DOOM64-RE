@@ -80,7 +80,7 @@ char *ControlText[] =   //8007517C
 
 #define M_TXT48 "COLORS"     // [GEC] NEW CHEAT CODE
 #define M_TXT49 "FULL BRIGHT"   // [GEC] NEW CHEAT CODE
-#define M_TXT50 "FILTER"   // [GEC] NEW CHEAT CODE
+#define M_TXT50 "Filtering:"   // [GEC] NEW CHEAT CODE
 
 #define M_TXT51 "DOOM 64"
 #define M_TXT52 "The Lost Levels"
@@ -156,14 +156,15 @@ menuitem_t Menu_ControlStick[3] = // 8005AA38
     {  6, 102, 150},    // Return
 };
 
-menuitem_t Menu_Display[6] = // 8005AA5C
+menuitem_t Menu_Display[7] = // 8005AA5C
 {
     {  9, 102, 60 },    // Brightness
     { 32, 102, 100},    // Center Display
     { 33, 102, 120},    // Messages
     { 34, 102, 140},    // Status Bar
-    { 13, 102, 160},    // Default Display
-    {  6, 102, 180},    // Return
+    { 50, 102, 160},    // Filtering
+    { 13, 102, 180},    // Default Display
+    {  6, 102, 200},    // Return
 };
 
 menuitem_t Menu_Game[4] = // 8005AAA4
@@ -208,7 +209,7 @@ menuitem_t Menu_CreateNote[3] = // 8005AB40
 
 //#define MAXFEATURES 5
 //#define MAXFEATURES 9
-#define MAXFEATURES 13
+#define MAXFEATURES 12
 menuitem_t Menu_Features[MAXFEATURES] = // 8005AB64
 {
     { 23, 40, 50},      // WARP TO LEVEL
@@ -226,7 +227,6 @@ menuitem_t Menu_Features[MAXFEATURES] = // 8005AB64
     //
     { 48, 40, 150},      // COLORS [GEC] NEW CHEAT CODE
     { 49, 40, 160},      // FULL BRIGHT [GEC] NEW CHEAT CODE
-    { 50, 40, 170},      // FILTER [GEC] NEW CHEAT CODE
 
     // no usados
 //#define M_TXT26 "SECURITY KEYS"
@@ -274,6 +274,7 @@ int MusVolume = 80;             // 8005A7C4
 int brightness = 100;             // 8005A7C8
 int M_SENSITIVITY = 0;          // 8005A7CC
 boolean FeaturesUnlocked = false; // 8005A7D0
+int TextureFilter = 0;
 
 int TempConfiguration[13] = // 8005A80C
 {
@@ -1014,6 +1015,8 @@ int M_MenuTicker(void) // 80007E0C
                         brightness = 100;
                         I_MoveDisplay(0,0);
                         P_RefreshBrightness();
+
+                        TextureFilter = 0;
                         return ga_nothing;
                     }
                     break;
@@ -1522,8 +1525,7 @@ int M_MenuTicker(void) // 80007E0C
                 case 50: // FILTER [GEC] NEW CHEAT CODE
                     if (truebuttons)
                     {
-                        players[0].cheats ^= CF_FILTER;
-                        gobalcheats ^= CF_FILTER;
+                        TextureFilter += TextureFilter < 2 ? 1 : -2;
                         S_StartSound(NULL, sfx_switch2);
                         return ga_nothing;
                     }
@@ -1683,10 +1685,6 @@ void M_FeaturesDrawer(void) // 800091C0
                 text = (!(players[0].cheats & CF_FULLBRIGHT)) ? "OFF": "ON";
                 break;
 
-            case 50: /* FILTER */
-                text = (!(players[0].cheats & CF_FILTER)) ? "LINEAR": "NEAREST";
-                break;
-
             case 53: /* ARTIFACTS */
                 text = (!(players[0].artifacts & 1 && players[0].artifacts & 2 && players[0].artifacts & 4)) ? "-" : "100%";
                 break;
@@ -1774,6 +1772,22 @@ void M_DisplayDrawer(void) // 80009884
                 text = "On";
             else
                 text = "Off";
+        }
+        else if (casepos == 50)
+        {
+            switch (TextureFilter)
+            {
+                case 2:
+                    text = "Sky";
+                    break;
+                case 1:
+                    text = "Off";
+                    break;
+                case 0:
+                default:
+                    text = "On";
+                    break;
+            }
         }
         else
         {
