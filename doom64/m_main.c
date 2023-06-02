@@ -85,6 +85,8 @@ char *ControlText[] =   //8007517C
 #define M_TXT51 "DOOM 64"
 #define M_TXT52 "The Lost Levels"
 
+#define M_TXT53 "Artifacts"
+
 char *MenuText[] =   // 8005ABA0
 {
     M_TXT00, M_TXT01, M_TXT02, M_TXT03, M_TXT04,
@@ -98,7 +100,7 @@ char *MenuText[] =   // 8005ABA0
     M_TXT40, M_TXT41, M_TXT42, M_TXT43, M_TXT44,
     M_TXT45, M_TXT46, M_TXT47,
     M_TXT48, M_TXT49, M_TXT50,  // [GEC] NEW
-    M_TXT51, M_TXT52
+    M_TXT51, M_TXT52, M_TXT53
 };
 
 menuitem_t Menu_Title[2] = // 8005A978
@@ -206,7 +208,7 @@ menuitem_t Menu_CreateNote[3] = // 8005AB40
 
 //#define MAXFEATURES 5
 //#define MAXFEATURES 9
-#define MAXFEATURES 12
+#define MAXFEATURES 13
 menuitem_t Menu_Features[MAXFEATURES] = // 8005AB64
 {
     { 23, 40, 50},      // WARP TO LEVEL
@@ -215,14 +217,16 @@ menuitem_t Menu_Features[MAXFEATURES] = // 8005AB64
     { 27, 40, 80},      // WEAPONS
     { 37, 40, 90},      // MAP EVERYTHING
     //
-    { 26, 40, 100},      // SECURITY KEYS
-    { 31, 40, 110},      // WALL BLOCKING
-    { 35, 40, 120},      // LOCK MONSTERS
-    { 39, 40, 130},      // MUSIC TEST
+    { 53, 40, 100},      // ARTIFACTS
     //
-    { 48, 40, 140},      // COLORS [GEC] NEW CHEAT CODE
-    { 49, 40, 150},      // FULL BRIGHT [GEC] NEW CHEAT CODE
-    { 50, 40, 160},      // FILTER [GEC] NEW CHEAT CODE
+    { 26, 40, 110},      // SECURITY KEYS
+    { 31, 40, 120},      // WALL BLOCKING
+    { 35, 40, 130},      // LOCK MONSTERS
+    { 39, 40, 140},      // MUSIC TEST
+    //
+    { 48, 40, 150},      // COLORS [GEC] NEW CHEAT CODE
+    { 49, 40, 160},      // FULL BRIGHT [GEC] NEW CHEAT CODE
+    { 50, 40, 170},      // FILTER [GEC] NEW CHEAT CODE
 
     // no usados
 //#define M_TXT26 "SECURITY KEYS"
@@ -1524,6 +1528,18 @@ int M_MenuTicker(void) // 80007E0C
                         return ga_nothing;
                     }
                     break;
+
+                case 53: // ARTIFACTS
+                    if (truebuttons)
+                    {
+                        players[0].artifacts |= 4;
+                        players[0].artifacts |= 2;
+                        players[0].artifacts |= 1;
+
+                        S_StartSound(NULL, sfx_switch2);
+                        return ga_nothing;
+                    }
+                    break;
                 }
 
             exit = ga_nothing;
@@ -1669,6 +1685,10 @@ void M_FeaturesDrawer(void) // 800091C0
 
             case 50: /* FILTER */
                 text = (!(players[0].cheats & CF_FILTER)) ? "LINEAR": "NEAREST";
+                break;
+
+            case 53: /* ARTIFACTS */
+                text = (!(players[0].artifacts & 1 && players[0].artifacts & 2 && players[0].artifacts & 4)) ? "-" : "100%";
                 break;
 
             default:
