@@ -486,8 +486,8 @@ void AM_DrawLine(player_t *player) // 800014C8
     line_t *l;
     int i, color;
 
-    vid_task->t.ucode = (u64 *) gspL3DEX_fifoTextStart;
-    vid_task->t.ucode_data = (u64 *) gspL3DEX_fifoDataStart;
+    vid_task->t.ucode = (u64 *) gspL3DEX2_fifoTextStart;
+    vid_task->t.ucode_data = (u64 *) gspL3DEX2_fifoDataStart;
 
     gDPPipeSync(GFX1++);
     gDPSetCycleType(GFX1++, G_CYC_1CYCLE);
