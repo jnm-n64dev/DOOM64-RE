@@ -82,6 +82,9 @@ char *ControlText[] =   //8007517C
 #define M_TXT49 "FULL BRIGHT"   // [GEC] NEW CHEAT CODE
 #define M_TXT50 "FILTER"   // [GEC] NEW CHEAT CODE
 
+#define M_TXT51 "DOOM 64"
+#define M_TXT52 "The Lost Levels"
+
 char *MenuText[] =   // 8005ABA0
 {
     M_TXT00, M_TXT01, M_TXT02, M_TXT03, M_TXT04,
@@ -94,7 +97,8 @@ char *MenuText[] =   // 8005ABA0
     M_TXT35, M_TXT36, M_TXT37, M_TXT38, M_TXT39,
     M_TXT40, M_TXT41, M_TXT42, M_TXT43, M_TXT44,
     M_TXT45, M_TXT46, M_TXT47,
-    M_TXT48, M_TXT49, M_TXT50  // [GEC] NEW
+    M_TXT48, M_TXT49, M_TXT50,  // [GEC] NEW
+    M_TXT51, M_TXT52
 };
 
 menuitem_t Menu_Title[2] = // 8005A978
@@ -117,6 +121,12 @@ menuitem_t Menu_Skill[4] = // 8005A990
     #if ENABLE_NIGHTMARE == 1
     { 19, 102, 160},    // Nightmare
     #endif // ENABLE_NIGHTMARE
+};
+
+menuitem_t Menu_Episode[2] =
+{
+    { 51, 112, 80 },    // DOOM 64
+    { 52, 112, 100},    // The Lost Levels
 };
 
 menuitem_t Menu_Options[6] = // 8005A9C0
@@ -1008,10 +1018,34 @@ int M_MenuTicker(void) // 80007E0C
                     if (truebuttons)
                     {
                         S_StartSound(NULL, sfx_pistol);
-                        M_FadeOutStart(8);
+                        M_SaveMenuData();
 
                         // Check ControllerPak
                         EnableExpPak = (M_ControllerPak() == 0);
+
+                        MenuItem = Menu_Episode;
+                        itemlines = 2;
+                        MenuCall = M_MenuTitleDrawer;
+                        cursorpos = 0;
+
+                        exit = MiniLoop(M_FadeInStart, M_MenuClearCall, M_MenuTicker, M_MenuGameDrawer);
+                        M_RestoreMenuData((exit == ga_exit));
+                        
+                        if (exit == ga_exit)
+                            return ga_nothing;
+
+                        return exit;
+                    }
+                    break;
+
+                case 51: // DOOM 64
+                case 52: // The Lost Levels
+                    if (truebuttons)
+                    {
+                        startmap = MenuItem[cursorpos].casepos == 52 ? 34 : 1;
+                        
+                        S_StartSound(NULL, sfx_pistol);
+                        M_SaveMenuData();
 
                         MenuItem = Menu_Skill;
                         #if ENABLE_NIGHTMARE == 1
@@ -1022,10 +1056,13 @@ int M_MenuTicker(void) // 80007E0C
                         MenuCall = M_MenuTitleDrawer;
                         cursorpos = 1;  // Set Default Bring it on!
 
-                        MiniLoop(M_FadeInStart, M_MenuClearCall, M_MenuTicker, M_MenuGameDrawer);
-                        startskill = MenuItem[cursorpos].casepos - 15;
+                        exit = MiniLoop(M_FadeInStart, M_MenuClearCall, M_MenuTicker, M_MenuGameDrawer);
+                        M_RestoreMenuData((exit == ga_exit));
+                        
+                        if (exit == ga_exit)
+                            return ga_nothing;
 
-                        return ga_exit;
+                        return exit;
                     }
                     break;
 
@@ -1037,8 +1074,9 @@ int M_MenuTicker(void) // 80007E0C
                 
                     if (truebuttons)
                     {
+                        startskill = MenuItem[cursorpos].casepos - 15;
                         S_StartSound(NULL, sfx_pistol);
-                        return ga_exit;
+                        return ga_restart;
                     }
                     break;
 
@@ -1090,9 +1128,10 @@ int M_MenuTicker(void) // 80007E0C
                     {
                         if (buttons & PAD_LEFT)
                         {
-                            m_actualmap -= 1;
-                            if (m_actualmap > 27)
-                                m_actualmap = 27;
+                            m_actualmap -= (m_actualmap == 34) ? 2 : 1;
+
+                            if (m_actualmap > 40)
+                                m_actualmap = 40;
 
                             if (m_actualmap > 0)
                             {
@@ -1103,13 +1142,13 @@ int M_MenuTicker(void) // 80007E0C
                         }
                         else if (buttons & PAD_RIGHT)
                         {
-                            m_actualmap += 1;
-                            if (m_actualmap < 28)
+                            m_actualmap += (m_actualmap == 32) ? 2 : 1;
+                            if (m_actualmap < 41)
                             {
                                 S_StartSound(NULL, sfx_switch2);
                                 return ga_nothing;
                             }
-                            m_actualmap = 27;
+                            m_actualmap = 40;
                         }
                         else if (buttons & ALL_CBUTTONS)
                         {
@@ -1513,6 +1552,10 @@ void M_MenuTitleDrawer(void) // 80008E7C
     {
         ST_DrawString(-1, 20, "Choose Your Skill...", text_alpha | 0xc0000000);
     }
+    else if (MenuItem == Menu_Episode)
+    {
+        ST_DrawString(-1, 20, "Choose Campaign", text_alpha | 0xc0000000);
+    }
     else if (MenuItem == Menu_Options)
     {
         ST_DrawString(-1, 20, "Options", text_alpha | 0xc0000000);
@@ -1559,7 +1602,7 @@ void M_FeaturesDrawer(void) // 800091C0
 
     for(i = 0; i < itemlines; i++)
     {
-        if ((item->casepos == 23) && ((m_actualmap >= 25) && (m_actualmap <= 27)))
+        if ((item->casepos == 23) && FUNLEVEL(m_actualmap))
         {
             /* Show "WARP TO FUN" text */
             ST_Message(item->x, item->y, MenuText[40], text_alpha | 0xffffff00);

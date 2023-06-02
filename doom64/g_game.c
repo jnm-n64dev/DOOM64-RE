@@ -259,6 +259,11 @@ void G_RunGame (void) // 80004794
             if (gameaction == ga_exitdemo)
                 return;
         }
+		else if(FUNLEVEL(gamemap))
+		{
+			gameaction = ga_exitdemo;
+			return;
+		}
         else
         {
             if (nextmap >= LASTLEVEL)

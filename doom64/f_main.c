@@ -83,6 +83,21 @@
 #define C_END6_TXT14	" "
 #define C_END6_TXT15	"The End."
 
+#define C_END7_TXT01    "You had not expected to be"
+#define C_END7_TXT02	"torn from Hell so soon after"
+#define C_END7_TXT03	"your fateful decision."
+#define C_END7_TXT04	"Getting back there was your"
+#define C_END7_TXT05	"only concern. The plans of"
+#define C_END7_TXT06	"the Sister Ressurector to"
+#define C_END7_TXT07	"exterminate you have failed."
+#define C_END7_TXT08	" "
+#define C_END7_TXT09	"A grim vision takes hold of"
+#define C_END7_TXT10	"your mind as the demon"
+#define C_END7_TXT11	"carcasses steam in your wake."
+#define C_END7_TXT12	"Stretched before you is a"
+#define C_END7_TXT13	"path of perpetual torment..."
+#define C_END7_TXT14	"A path through DOOM..."
+
 char *endcluster1[] =   // 8005A2C0
 {
     C_END1_TXT01,
@@ -181,6 +196,25 @@ char *endcluster6[] =   // 8005A3B0
 	C_END6_TXT14,
 	C_END6_TXT15,
 	T_NULL
+};
+
+char *endcluster7[] =
+{
+    C_END7_TXT01,
+    C_END7_TXT02,
+    C_END7_TXT03,
+    C_END7_TXT04,
+    C_END7_TXT05,
+    C_END7_TXT06,
+    C_END7_TXT07,
+    C_END7_TXT08,
+    C_END7_TXT09,
+    C_END7_TXT10,
+    C_END7_TXT11,
+    C_END7_TXT12,
+    C_END7_TXT13,
+    C_END7_TXT14,
+    T_NULL
 };
 
 //
@@ -484,7 +518,7 @@ int F_Ticker(void) // 80003258
             break;
 
         case F_STAGE_DRAWTEXT:
-            if (*endcluster6[textline])
+            if (gamemap == 39 ? *endcluster7[textline] : *endcluster6[textline])
             {
                 textalpha += 8;
                 if (textalpha > 255)
@@ -765,11 +799,11 @@ void F_Drawer(void) // 800039DC
             ypos = textypos;
             for(i = 0; i < textline; i++)
             {
-                ST_DrawString(-1, ypos, endcluster6[i], 0xc0c0c0ff);
+                ST_DrawString(-1, ypos, (gamemap == 39 ? endcluster7[i] : endcluster6[i]), 0xc0c0c0ff);
                 ypos += 14;
             }
 
-            ST_DrawString(-1, ypos, endcluster6[i], textalpha | 0xc0c0c000);
+            ST_DrawString(-1, ypos, (gamemap == 39 ? endcluster7[i] : endcluster6[i]), textalpha | 0xc0c0c000);
             break;
 
         case F_STAGE_CAST:

@@ -42,6 +42,13 @@ extern int nextmap;
 #define MI_TXT31	"In The Void"
 #define MI_TXT32	"Hectic"
 #define MI_TXT33	"TITLE"
+#define MI_TXT34	"Plant Ops"
+#define MI_TXT35	"Evil Sacrifice"
+#define MI_TXT36	"Cold Grounds"
+#define MI_TXT37	"Wretched Vats"
+#define MI_TXT38	"Thy Glory"
+#define MI_TXT39	"Final Judgement"
+#define MI_TXT40	"Panic"
 
 mapinfo_t MapInfo[] = //8005A478
 {
@@ -79,6 +86,13 @@ mapinfo_t MapInfo[] = //8005A478
     {MI_TXT31 , 103},
     {MI_TXT32 , 104},
     {MI_TXT33 , 115},
+    {MI_TXT34 , 100},
+    {MI_TXT35 , 95},
+    {MI_TXT36 , 111},
+    {MI_TXT37 , 94},
+    {MI_TXT38 , 105},
+    {MI_TXT39 , 98},
+    {MI_TXT40 , 101},
     {T_NULL , 0}
 };
 
@@ -314,7 +328,7 @@ void IN_Drawer(void) // 80005164
         ST_DrawString(210, 120, timetext, PACKRGBA(192, 0, 0, text_alpha));
     }
 
-	if ((nextstage > 4) && (nextmap < LASTLEVEL))
+	if ((nextstage > 4) && (nextmap < LASTLEVEL) && !FUNLEVEL(gamemap))
 	{
         ST_DrawString(-1, 145, "Entering", PACKRGBA(255, 255, 255, text_alpha));
         ST_DrawString(-1, 161, MapInfo[nextmap].name, PACKRGBA(255, 255, 255, text_alpha));

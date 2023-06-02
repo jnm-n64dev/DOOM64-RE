@@ -119,9 +119,8 @@ typedef enum
 	ga_exit
 } gameaction_t;
 
-#define LASTLEVEL 34
-#define TOTALMAPS 33
-
+#define LASTLEVEL 41
+#define FUNLEVEL(map)	((map == 25 || map == 26 || map == 27 || map == 40))
 
 /* */
 /* library replacements */
