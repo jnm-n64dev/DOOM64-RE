@@ -190,6 +190,11 @@ mobj_t *P_SpawnMapThing (mapthing_t *mthing) // 80018C24
     if (mthing->options & MTF_ONDEATH)
 		mobj->flags |= MF_TRIGDEATH;
 
+	if (mthing->options & MTF_NIGHTMARE) {
+		mobj->health *= 2;
+		mobj->flags |= MF_NIGHTMARE;
+	}
+
     if (mthing->options & MTF_SECRET)
     {
 		mobj->flags |= MF_COUNTSECRET;
@@ -436,6 +441,12 @@ mobj_t *P_SpawnMissile (mobj_t *source, mobj_t *dest, fixed_t xoffs, fixed_t yof
         rnd1 = P_Random();
         rnd2 = P_Random();
 		an += ((rnd2 - rnd1) << 20);
+    }
+
+	if (source && source->flags & MF_NIGHTMARE)
+	{
+        th->flags |= MF_NIGHTMARE;
+        speed *= 2;
     }
 
     th->angle = an;
