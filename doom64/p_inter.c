@@ -272,8 +272,8 @@ void P_TouchSpecialThing (mobj_t *special, mobj_t *toucher) // 80014810
 	fixed_t		delta;
 	int			sound;
 	char        *message;
-	int			messagecolor = 0xffffff00;
 	int         artflag;
+	int			messagelevel = MSG_LOW;
 
 	delta = special->z - toucher->z;
 	if (delta > toucher->height || delta < -8*FRACUNIT)
@@ -573,8 +573,8 @@ void P_TouchSpecialThing (mobj_t *special, mobj_t *toucher) // 80014810
             message = "Whatever it is, it doesn't\nbelong in this world...";
         else /* ART_DOUBLE */
             message = "It must do something...";
-
-		messagecolor = 0xff000000;
+	
+		messagelevel = MSG_HIGH;
         sound = sfx_powerup;
 		break;
 
@@ -590,11 +590,16 @@ void P_TouchSpecialThing (mobj_t *special, mobj_t *toucher) // 80014810
 		break;
 	}
 
+	if (special->flags & MF_COUNTSECRET)
+	{
+		player->message[MSG_MID] = "You found a secret item!";
+        player->messagetic[MSG_MID] = MSGTICS;
+	}
+
     if (message)
     {
-        player->message = message;
-        player->messagetic = MSGTICS;
-		player->messagecolor = messagecolor;
+        player->message[messagelevel] = message;
+        player->messagetic[messagelevel] = MSGTICS;
     }
 
 	if (special->flags & MF_COUNTITEM)

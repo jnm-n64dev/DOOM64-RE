@@ -70,6 +70,7 @@ also see P_SpawnPlayer in P_Mobj
 void G_PlayerFinishLevel (int player) // 80004598
 {
 	player_t *p;
+	int i;
 
 	p = &players[player];
 
@@ -81,7 +82,7 @@ void G_PlayerFinishLevel (int player) // 80004598
 	p->bonuscount = 0;
     p->bfgcount = 0;
     p->automapflags = 0;
-    p->messagetic = 0;
+	for (i = 0; i < NUMMESSAGES; i++) p->messagetic[i] = 0;
 }
 
 /*

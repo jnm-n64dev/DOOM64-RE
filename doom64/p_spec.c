@@ -838,9 +838,8 @@ boolean P_UseSpecialLine (line_t *line, mobj_t *thing) // 800204BC
         {
             if(!player->cards[it_bluecard] && !player->cards[it_blueskull])
             {
-                player->message = "You need a blue key.";
-                player->messagetic = MSGTICS;
-                player->messagecolor = 0xffffff00;
+                player->message[MSG_LOW] = "You need a blue key.";
+                player->messagetic[MSG_LOW] = MSGTICS;
                 S_StartSound(thing, sfx_oof);
 
                 if (player == &players[0])
@@ -854,9 +853,8 @@ boolean P_UseSpecialLine (line_t *line, mobj_t *thing) // 800204BC
         {
             if(!player->cards[it_yellowcard] && !player->cards[it_yellowskull])
             {
-                player->message = "You need a yellow key.";
-                player->messagetic = MSGTICS;
-                player->messagecolor = 0xffffff00;
+                player->message[MSG_LOW] = "You need a yellow key.";
+                player->messagetic[MSG_LOW] = MSGTICS;
                 S_StartSound(thing, sfx_oof);
 
                 if (player == &players[0])
@@ -870,9 +868,8 @@ boolean P_UseSpecialLine (line_t *line, mobj_t *thing) // 800204BC
         {
             if(!player->cards[it_redcard] && !player->cards[it_redskull])
             {
-                player->message = "You need a red key.";
-                player->messagetic = MSGTICS;
-                player->messagecolor = 0xffffff00;
+                player->message[MSG_LOW] = "You need a red key.";
+                player->messagetic[MSG_LOW] = MSGTICS;
                 S_StartSound(thing, sfx_oof);   // ?? line missing on Doom64
 
                 if (player == &players[0])
@@ -891,9 +888,8 @@ boolean P_UseSpecialLine (line_t *line, mobj_t *thing) // 800204BC
         if ((actionType == 90 || actionType == 91 || actionType == 92) &&
            !((player->artifacts & 1) << ((actionType + 6) & 0x1f)))
         {
-            player->message = "You lack the ability to activate it.";
-            player->messagetic = MSGTICS;
-            player->messagecolor = 0xffffff00;
+            player->message[MSG_LOW] = "You lack the ability to activate it.";
+            player->messagetic[MSG_LOW] = MSGTICS;
             S_StartSound(thing, sfx_oof);
 
             return false;

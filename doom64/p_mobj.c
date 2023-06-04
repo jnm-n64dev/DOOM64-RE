@@ -249,8 +249,11 @@ void P_SpawnPlayer(/*mapthing_t *mthing*/) // 80018F94
 	p->mo = mobj;
 	p->playerstate = PST_LIVE;
 	p->refire = 0;
-	p->message = NULL;
-	p->messagetic = 0;
+	for (i = 0; i < NUMMESSAGES; i++)
+	{
+		p->message[i] = NULL;
+		p->messagetic[i] = 0;
+	}
 	p->damagecount = 0;
 	p->bonuscount = 0;
 	p->extralight = 0;

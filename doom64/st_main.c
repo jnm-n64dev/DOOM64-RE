@@ -116,6 +116,13 @@ symboldata_t symboldata[] = // 8005B260
     //{134, 96,   7, 13}, // Right arrow Missing On Doom 64
 };
 
+int messagecolors[NUMMESSAGES] =
+{
+    0xff000000,
+    0xffff0000,
+    0xffffff00
+};
+
 int card_x[6] = {(78 << 2), (89 << 2), (100 << 2), (78 << 2), (89 << 2), (100 << 2)};      // 8005b870
 
 void ST_Init(void) // 80029BA0
@@ -158,13 +165,14 @@ void ST_Ticker (void) // 80029C88
 {
 	player_t    *player;
 	int		    ind, base;
+    int         i;
 
 	player = &players[0];
 
     /* */
 	/* Countdown time for the message */
 	/* */
-    player->messagetic--;
+    for (i = 0; i < NUMMESSAGES; i++) player->messagetic[i]--;
 
 	/* */
 	/* Tried to open a CARD or SKULL door? */
@@ -224,19 +232,33 @@ void ST_Drawer (void) // 80029DC0
     player_t    *player;
     weapontype_t weapon;
 	int ammo, ind, ms_alpha;
+    int i, j;
+    int pos;
 
     player = &players[0];
 
     /* */
 	/* Draw Text Message */
 	/* */
-    ms_alpha = players[0].messagetic << 3;
-    if ((enable_messages) && (ms_alpha > 0))
+    if (enable_messages)
     {
-        if (ms_alpha >= 255)
-            ms_alpha = 255;
-
-        ST_Message(20, 20, players[0].message, ms_alpha | players[0].messagecolor);
+        pos = 20;
+        for (i = 0; i < NUMMESSAGES; i++)
+        {
+            ms_alpha = players[0].messagetic[i] << 3;
+            if (ms_alpha > 0)
+            {
+                if (ms_alpha >= 255)
+                    ms_alpha = 255;
+                
+                ST_Message(20, pos, players[0].message[i], ms_alpha | messagecolors[i]);
+                pos += 10;
+                for (j = 0; players[0].message[i][j] != '\0'; ++j)
+                {
+                    if (players[0].message[i][j] == '\n') pos += 10;
+                }
+            }
+        }
     }
 
     if (enable_statusbar)

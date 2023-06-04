@@ -232,6 +232,10 @@ void AM_Drawer (void) // 800009AC
 	int         artflag;
 	char        map_name[48];
 
+    boolean     msgticking;
+    int         msgpos;
+    int         j;
+
     gDPPipeSync(GFX1++);
     gDPSetCycleType(GFX1++, G_CYC_FILL);
     gDPSetRenderMode(GFX1++,G_RM_NOOP,G_RM_NOOP2);
@@ -388,17 +392,26 @@ void AM_Drawer (void) // 800009AC
         gSP1Triangle(GFX1++, 0, 1, 2, 0 /*flag*/);
     }
 
-
     if (enable_messages)
     {
-        if (p->messagetic <= 0)
+        msgpos = 20;
+        for (i = 0; i < NUMMESSAGES; i++)
+        {
+            if (p->messagetic[i] > 0)
+            {
+                ST_Message(20, msgpos, p->message[i], 255 | messagecolors[i]);
+                msgpos += 10;
+                for (j = 0; p->message[i][j] != '\0'; ++j)
+                {
+                    if (p->message[i][j] == '\n') msgpos += 10;
+                }
+                msgticking = true;
+            }
+        }
+        if (!msgticking)
         {
             sprintf(map_name, "LEVEL %d: %s", gamemap, MapInfo[gamemap].name);
             ST_Message(20, 20, map_name, 0xffffffff);
-        }
-        else
-        {
-            ST_Message(20, 20, p->message, 0xffffffff);
         }
     }
 

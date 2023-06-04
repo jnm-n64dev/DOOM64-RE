@@ -297,7 +297,7 @@ void P_BuildMove (player_t *player) // 80022154
 	{
 		speed = (buttons & cbutton->BT_SPEED) > 0;
 	}
-	
+
 	sensitivity = 0;
 
 	/*  */
@@ -586,9 +586,8 @@ void P_DeathThink (player_t *player) // 80022914
 	/* mocking text */
     if ((ticon - deathmocktics) > MAXMOCKTIME)
     {
-        player->messagetic = MSGTICS;
-        player->message = mockstrings[P_Random() % 12];
-		player->messagecolor = 0xffffff00;
+        player->messagetic[MSG_LOW] = MSGTICS;
+        player->message[MSG_LOW] = mockstrings[P_Random() % 12];
         deathmocktics = ticon;
     }
 
@@ -634,9 +633,8 @@ void P_PlayerInSpecialSector (player_t *player, sector_t *sec) // 80022B1C
     if(sec->flags & MS_SECRET)
     {
         player->secretcount++;
-        player->message = "You found a secret area!";
-        player->messagetic = MSGTICS;
-		player->messagecolor = 0xffff0000;
+        player->message[MSG_MID] = "You found a secret area!";
+        player->messagetic[MSG_MID] = MSGTICS;
         sec->flags &= ~MS_SECRET;
     }
 

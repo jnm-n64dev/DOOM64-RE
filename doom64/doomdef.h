@@ -410,6 +410,16 @@ typedef enum
 
 #define	MSGTICS		    (5*30)
 
+enum MSG_LEVELS
+{
+	MSG_HIGH,
+	MSG_MID,
+	MSG_LOW,
+	NUMMESSAGES
+};
+
+extern int messagecolors[NUMMESSAGES];
+
 /*
 ================
 =
@@ -452,9 +462,8 @@ typedef struct player_s
 	int			refire;					/* refired shots are less accurate */
 
 	int			killcount, itemcount, secretcount;		/* for intermission */
-	char		*message;				/* hint messages */
-	int         messagetic;             /* messages tic countdown*/
-	int			messagecolor;			/* message color */
+	char		*message[NUMMESSAGES];				/* hint messages */
+	int         messagetic[NUMMESSAGES];             /* messages tic countdown*/
 	int			damagecount, bonuscount;/* for screen flashing */
 	int			bfgcount;               /* for bfg screen flashing */
 	mobj_t		*attacker;				/* who did damage (NULL for floors) */
