@@ -12,3 +12,8 @@
 *.z64
 
 !doom64/WESSLIB.o
+
+/doom64/UNDME00.SRB
+/doom64/UNDME00.SRB.txt
+*.pak
+*.wad.bak
