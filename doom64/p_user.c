@@ -277,7 +277,27 @@ void P_BuildMove (player_t *player) // 80022154
 
     player->forwardmove = player->sidemove = player->angleturn = 0;
 
-	speed = (buttons & cbutton->BT_SPEED) > 0;
+	if (!demoplayback)
+	{
+		switch (Autorun)
+		{
+			case 2:
+				speed = player->speedtoggle == 1;
+				break;
+			case 1:
+				speed = (buttons & cbutton->BT_SPEED) < 1;
+				break;
+			case 0:
+			default:
+				speed = (buttons & cbutton->BT_SPEED) > 0;
+				break;
+		}
+	}
+	else
+	{
+		speed = (buttons & cbutton->BT_SPEED) > 0;
+	}
+	
 	sensitivity = 0;
 
 	/*  */
@@ -795,6 +815,21 @@ void P_PlayerThink (player_t *player) // 80022D60
         {
 			player->attackdown = 0;
         }
+
+		if (buttons & cbutton->BT_SPEED)
+		{
+			if (!demoplayback && Autorun == 2 && player->speeddown == false)
+			{
+				player->speedtoggle = !player->speedtoggle;
+				player->message[MSG_LOW] = player->speedtoggle ? "Autorun: ON" : "Autorun: OFF";
+				player->messagetic[MSG_LOW] = MSGTICS;
+				player->speeddown = true;
+			}
+		}
+		else
+		{
+			player->speeddown = false;
+		}
 
 		/* */
 		/* cycle psprites */

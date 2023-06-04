@@ -21,9 +21,11 @@ int DrawerStatus;
 #define CT_TXT11	"strafe right"
 #define CT_TXT12	"weapon backward"
 #define CT_TXT13	"weapon forward"
+#define CT_TXT14    "autorun: %s"
 
 char *ControlText[] =   //8007517C
 {
+    CT_TXT14, 
     CT_TXT00, CT_TXT01, CT_TXT02, CT_TXT03, CT_TXT04,
 	CT_TXT05, CT_TXT06, CT_TXT07, CT_TXT08, CT_TXT09,
 	CT_TXT10, CT_TXT11, CT_TXT12, CT_TXT13
@@ -275,6 +277,7 @@ int brightness = 100;             // 8005A7C8
 int M_SENSITIVITY = 0;          // 8005A7CC
 boolean FeaturesUnlocked = false; // 8005A7D0
 int TextureFilter = 0;
+int Autorun = 0;
 
 int TempConfiguration[13] = // 8005A80C
 {
@@ -2587,12 +2590,12 @@ int M_ControlPadTicker(void) // 8000B694
             if (buttons & PAD_DOWN)
             {
                 cursorpos += 1;
-                if (cursorpos < 14)
+                if (cursorpos < 15)
                     S_StartSound(NULL, sfx_switch1);
                 else
-                    cursorpos = 13;
+                    cursorpos = 14;
 
-                if (cursorpos > (linepos + 5))
+                if (cursorpos > (linepos + 6))
                     linepos += 1;
             }
             else
@@ -2628,11 +2631,32 @@ int M_ControlPadTicker(void) // 8000B694
         {
             tmpcfg = TempConfiguration;
 
-            if (cursorpos == 0) // Set Default Configuration
+            if (cursorpos == 0)
             {
                 if (!(buttons & (PAD_UP|PAD_LEFT)))
                 {
-                    if (buttons & (PAD_DOWN|PAD_RIGHT))
+                    if (buttons & (PAD_DOWN|PAD_RIGHT|ALL_BUTTONS))
+                    {
+                        Autorun += 1;
+                        if (Autorun > 2) Autorun = 0;
+                    }
+                }
+                else
+                {
+                    Autorun -= 1;
+                    if (Autorun < 0) Autorun = 2;
+                }
+                if ((buttons & (ALL_BUTTONS|ALL_JPAD)) != 0)
+                {
+                    S_StartSound(NULL, sfx_switch2);
+                    return 0;
+                }
+            }
+            else if (cursorpos == 1) // Set Default Configuration
+            {
+                if (!(buttons & (PAD_UP|PAD_LEFT)))
+                {
+                    if (buttons & (PAD_DOWN|PAD_RIGHT|ALL_BUTTONS))
                     {
                         ConfgNumb += 1;
                         if(ConfgNumb > 4)
@@ -2660,7 +2684,7 @@ int M_ControlPadTicker(void) // 8000B694
                     code = *tmpcfg++;
                     if ((code & buttons) != 0)
                     {
-                        TempConfiguration[cursorpos + 12] = code;
+                        TempConfiguration[cursorpos + 11] = code;
                         S_StartSound(NULL,sfx_switch2);
                         return 0;
                     }
@@ -2674,7 +2698,7 @@ int M_ControlPadTicker(void) // 8000B694
 
 void M_ControlPadDrawer(void) // 8000B988
 {
-    int i, lpos;
+    int i, lpos, configpos;
     int *tmpcfg;
     char **text;
     char buffer [44];
@@ -2687,38 +2711,57 @@ void M_ControlPadDrawer(void) // 8000B988
         lpos = linepos;
         do
         {
-            if (lpos != 0)
+            if (lpos == 0)
             {
-                i = 0;
-                if(lpos != cursorpos || ((ticon & 8U) == 0))
+                switch (Autorun)
                 {
-                    tmpcfg = TempConfiguration;
-                    do
+                    case 2:
+                        sprintf(buffer, *text, "Toggle");
+                        break;
+                    case 1:
+                        sprintf(buffer, *text, "On");
+                        break;
+                    case 0:
+                    default:
+                        sprintf(buffer, *text, "Off");
+                        break;
+                }   
+            }
+            else if (lpos >= 1)
+            {
+                if (lpos > 1)
+                {
+                    i = 0;
+                    if(lpos != cursorpos || ((ticon & 8U) == 0))
                     {
-                        if ((*tmpcfg & TempConfiguration[lpos + 12]) != 0) break;
+                        tmpcfg = TempConfiguration;
+                        do
+                        {
+                            if ((*tmpcfg & TempConfiguration[lpos + 11]) != 0) break;
 
-                        i += 1;
-                        tmpcfg++;
-                    } while (i != 13);
+                            i += 1;
+                            tmpcfg++;
+                        } while (i != 13);
 
-                    ST_DrawSymbol(60, ((lpos - linepos) * 18) + 68, i + 80, text_alpha | 0xffffff00);
+                        ST_DrawSymbol(60, ((lpos - linepos) * 18) + 59, i + 80, text_alpha | 0xffffff00);
+                    }
                 }
+                sprintf(buffer, *text, ConfgNumb + 1);
             }
 
-            sprintf(buffer, *text, ConfgNumb + 1);
-            ST_DrawString(80, ((lpos - linepos) * 18) + 68, buffer, text_alpha | 0xc0000000);
+            ST_DrawString(80, ((lpos - linepos) * 18) + 59, buffer, text_alpha | 0xc0000000);
 
             lpos += 1;
             text += 1;
-        } while (lpos < (linepos + 6));
+        } while (lpos < (linepos + 7));
     }
 
     if (linepos != 0) {
-        ST_DrawString(80, 50, "\x8f more...", text_alpha | 0xffffff00);
+        ST_DrawString(80, 41, "\x8f more...", text_alpha | 0xffffff00);
     }
 
     if ((linepos + 6) < 14) {
-        ST_DrawString(80, 176, "\x8e more...", text_alpha | 0xffffff00);
+        ST_DrawString(80, 185, "\x8e more...", text_alpha | 0xffffff00);
     }
 
     ST_DrawSymbol(23,(cursorpos - linepos) * 0x12 + 0x3b, MenuAnimationTic + 0x46, text_alpha | 0xffffff00);

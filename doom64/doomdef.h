@@ -467,6 +467,9 @@ typedef struct player_s
 
 	int			turnheld;				/* for accelerative turning */
 	int         onground;               /* [d64] */
+
+	boolean		speedtoggle;			/* toggle autorun */
+	boolean		speeddown;				/* true if button down last tic */
 } player_t;
 
 #define CF_NOCLIP       1       // no use
@@ -796,6 +799,7 @@ extern int brightness;              // 8005A7C8
 extern int M_SENSITIVITY;           // 8005A7CC
 extern boolean FeaturesUnlocked;    // 8005A7D0
 extern int TextureFilter;
+extern int Autorun;
 
 int M_RunTitle(void); // 80007630
 
