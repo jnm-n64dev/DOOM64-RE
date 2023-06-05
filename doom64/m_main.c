@@ -2764,7 +2764,7 @@ void M_ControlPadDrawer(void) // 8000B988
         ST_DrawString(80, 185, "\x8e more...", text_alpha | 0xffffff00);
     }
 
-    ST_DrawSymbol(23,(cursorpos - linepos) * 0x12 + 0x3b, MenuAnimationTic + 0x46, text_alpha | 0xffffff00);
+    ST_DrawSymbol(23,(cursorpos - linepos) * 0x12 + 0x3b - 9, MenuAnimationTic + 0x46, text_alpha | 0xffffff00);
 
     ST_DrawString(-1, 210, "press \x8d to exit", text_alpha | 0xffffff00);
 }
