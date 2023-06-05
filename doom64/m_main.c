@@ -88,6 +88,7 @@ char *ControlText[] =   //8007517C
 #define M_TXT52 "The Lost Levels"
 
 #define M_TXT53 "Artifacts"
+#define M_TXT54 "Skill"
 
 char *MenuText[] =   // 8005ABA0
 {
@@ -102,7 +103,7 @@ char *MenuText[] =   // 8005ABA0
     M_TXT40, M_TXT41, M_TXT42, M_TXT43, M_TXT44,
     M_TXT45, M_TXT46, M_TXT47,
     M_TXT48, M_TXT49, M_TXT50,  // [GEC] NEW
-    M_TXT51, M_TXT52, M_TXT53
+    M_TXT51, M_TXT52, M_TXT53, M_TXT54
 };
 
 menuitem_t Menu_Title[2] = // 8005A978
@@ -211,7 +212,7 @@ menuitem_t Menu_CreateNote[3] = // 8005AB40
 
 //#define MAXFEATURES 5
 //#define MAXFEATURES 9
-#define MAXFEATURES 12
+#define MAXFEATURES 13
 menuitem_t Menu_Features[MAXFEATURES] = // 8005AB64
 {
     { 23, 40, 50},      // WARP TO LEVEL
@@ -221,14 +222,15 @@ menuitem_t Menu_Features[MAXFEATURES] = // 8005AB64
     { 37, 40, 90},      // MAP EVERYTHING
     //
     { 53, 40, 100},      // ARTIFACTS
+    { 54, 40, 110},      // SKILL
     //
-    { 26, 40, 110},      // SECURITY KEYS
-    { 31, 40, 120},      // WALL BLOCKING
-    { 35, 40, 130},      // LOCK MONSTERS
-    { 39, 40, 140},      // MUSIC TEST
+    { 26, 40, 120},      // SECURITY KEYS
+    { 31, 40, 130},      // WALL BLOCKING
+    { 35, 40, 140},      // LOCK MONSTERS
+    { 39, 40, 150},      // MUSIC TEST
     //
-    { 48, 40, 150},      // COLORS [GEC] NEW CHEAT CODE
-    { 49, 40, 160},      // FULL BRIGHT [GEC] NEW CHEAT CODE
+    { 48, 40, 160},      // COLORS [GEC] NEW CHEAT CODE
+    { 49, 40, 170},      // FULL BRIGHT [GEC] NEW CHEAT CODE
 
     // no usados
 //#define M_TXT26 "SECURITY KEYS"
@@ -1545,6 +1547,36 @@ int M_MenuTicker(void) // 80007E0C
                         return ga_nothing;
                     }
                     break;
+
+                case 54: // SKILL
+                    if (buttons ^ oldbuttons)
+                    {
+                        if (buttons & PAD_LEFT)
+                        {
+                            if (gameskill > sk_baby || startskill > sk_baby)
+                            {
+                                startskill -= 1;
+                                gameskill -= 1;
+                                S_StartSound(NULL, sfx_switch2);
+                                return ga_nothing;
+                            }
+                        }
+                        else if (buttons & PAD_RIGHT)
+                        {
+                            #if ENABLE_NIGHTMARE == 1
+                            if (gameskill < sk_nightmare || startskill < sk_nightmare)
+                            #else
+                            if (gameskill < sk_hard || startskill < sk_hard)
+                            #endif
+                            {
+                                startskill += 1;
+                                gameskill += 1;
+                                S_StartSound(NULL, sfx_switch2);
+                                return ga_nothing;
+                            }
+                        }
+                    }
+                    break;
                 }
 
             exit = ga_nothing;
@@ -1690,6 +1722,30 @@ void M_FeaturesDrawer(void) // 800091C0
 
             case 53: /* ARTIFACTS */
                 text = (!(players[0].artifacts & 1 && players[0].artifacts & 2 && players[0].artifacts & 4)) ? "-" : "100%";
+                break;
+
+            case 54: /* SKILL */
+                switch (gameskill)
+                {
+                    #if ENABLE_NIGHTMARE == 1
+                    case 4:
+                        text = M_TXT19;
+                        break;
+                    #endif
+                    case 3:
+                        text = M_TXT18;
+                        break;
+                    case 2:
+                        text = M_TXT17;
+                        break;
+                    case 1:
+                        text = M_TXT16;
+                        break;
+                    case 0:
+                    default:
+                        text = M_TXT15;
+                        break;
+                }
                 break;
 
             default:
