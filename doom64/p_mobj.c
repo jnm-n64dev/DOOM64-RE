@@ -465,7 +465,7 @@ mobj_t *P_SpawnMissile (mobj_t *source, mobj_t *dest, fixed_t xoffs, fixed_t yof
         th->momz = ((dest->z + (dest->height >> 1)) - z) / dist;
     }
 
-	if (!P_CheckPosition (th, th->x, th->y))
+	if (!P_TryMove(th, th->x, th->y))
 		P_ExplodeMissile (th);
 
 	return th;
