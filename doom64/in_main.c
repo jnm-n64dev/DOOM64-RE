@@ -149,7 +149,7 @@ void IN_Start(void) // 80004AF0
 	last_ticon = 0;
 	text_alpha = 255;
 
-    if ((nextmap >= 2) && (nextmap < LASTLEVEL))
+    if ((nextmap >= 0) && (nextmap < LASTLEVEL))
 	{
 		M_EncodePassword(Passwordbuff);
         CurPasswordSlot = 16;
@@ -162,7 +162,7 @@ void IN_Stop(void) // 80004DB0
 {
 	S_StopMusic();
 
-    if ((nextmap >= 2) && (nextmap < LASTLEVEL))
+    if ((nextmap >= 0) && (nextmap < LASTLEVEL))
     {
         if (EnableExpPak) {
             MiniLoop(M_SavePakStart,M_SavePakStop,M_SavePakTicker,M_SavePakDrawer);
