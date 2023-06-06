@@ -89,6 +89,7 @@ char *ControlText[] =   //8007517C
 
 #define M_TXT53 "Artifacts"
 #define M_TXT54 "Skill"
+#define M_TXT55 "Load Game"
 
 char *MenuText[] =   // 8005ABA0
 {
@@ -103,10 +104,17 @@ char *MenuText[] =   // 8005ABA0
     M_TXT40, M_TXT41, M_TXT42, M_TXT43, M_TXT44,
     M_TXT45, M_TXT46, M_TXT47,
     M_TXT48, M_TXT49, M_TXT50,  // [GEC] NEW
-    M_TXT51, M_TXT52, M_TXT53, M_TXT54
+    M_TXT51, M_TXT52, M_TXT53, M_TXT54, M_TXT55
 };
 
-menuitem_t Menu_Title[2] = // 8005A978
+menuitem_t Menu_Title[3] = // 8005A978
+{
+    { 14, 115, 170 },   // New Game
+    { 55, 115, 190 },   // Load Game
+	{ 11, 115, 210 },   // Options
+};
+
+menuitem_t Menu_TitleNoSave[2] =
 {
     { 14, 115, 190 },   // New Game
 	{ 11, 115, 210 },   // Options
@@ -280,6 +288,7 @@ int M_SENSITIVITY = 0;          // 8005A7CC
 boolean FeaturesUnlocked = false; // 8005A7D0
 int TextureFilter = 0;
 int Autorun = 0;
+byte SavedConfig[13];
 
 int TempConfiguration[13] = // 8005A80C
 {
@@ -348,18 +357,233 @@ int DefaultConfiguration[5][13] = // 8005A840
 
 //-----------------------------------------
 
+void M_EncodeConfig(void)
+{
+    int i;
+    int controlKey[13];
+
+    SavedConfig[0] = FeaturesUnlocked & 0x1;
+    SavedConfig[0] += (enable_messages & 0x1) << 1;
+    SavedConfig[0] += (enable_statusbar & 0x1) << 2;
+    SavedConfig[0] += (ConfgNumb & 0x7) << 3; //0-4
+    //2 bits free
+
+    SavedConfig[1] = MusVolume;
+    
+    SavedConfig[2] = SfxVolume;
+
+    SavedConfig[3] = brightness;
+
+    SavedConfig[4] = M_SENSITIVITY;
+
+    for (i = 0; i < 13; i++)
+    {
+        if (ActualConfiguration[i] == PAD_A)
+        {
+            controlKey[i] = 0;
+        }
+        else if (ActualConfiguration[i] == PAD_B)
+        {
+            controlKey[i] = 1;
+        }
+        else if (ActualConfiguration[i] == PAD_DOWN)
+        {
+            controlKey[i] = 2;
+        }
+        else if (ActualConfiguration[i] == PAD_DOWN_C)
+        {
+            controlKey[i] = 3;
+        }
+        else if (ActualConfiguration[i] & PAD_L_TRIG)
+        {
+            controlKey[i] = 4;
+        }
+        else if (ActualConfiguration[i] == PAD_LEFT)
+        {
+            controlKey[i] = 5;
+        }
+        else if (ActualConfiguration[i] == PAD_LEFT_C)
+        {
+            controlKey[i] = 6;
+        }
+        else if (ActualConfiguration[i] == PAD_R_TRIG)
+        {
+            controlKey[i] = 7;
+        }
+        else if (ActualConfiguration[i] == PAD_RIGHT)
+        {
+            controlKey[i] = 8;
+        }
+        else if (ActualConfiguration[i] == PAD_RIGHT_C)
+        {
+            controlKey[i] = 9;
+        }
+        else if (ActualConfiguration[i] == PAD_START)
+        {
+            controlKey[i] = 10;
+        }
+        else if (ActualConfiguration[i] == PAD_UP)
+        {
+            controlKey[i] = 11;
+        }
+        else if (ActualConfiguration[i] == PAD_UP_C)
+        {
+            controlKey[i] = 12;
+        }
+        else if (ActualConfiguration[i] == PAD_Z_TRIG)
+        {
+            controlKey[i] = 13;
+        }
+    }
+
+    SavedConfig[5] = controlKey[0] & 0xF;
+    SavedConfig[5] += (controlKey[1] & 0xF) << 4;
+
+    SavedConfig[6] = controlKey[2] & 0xF;
+    SavedConfig[6] += (controlKey[3] & 0xF) << 4;
+
+    SavedConfig[7] = controlKey[4] & 0xF;
+    SavedConfig[7] += (controlKey[5] & 0xF) << 4;
+
+    SavedConfig[8] = controlKey[6] & 0xF;
+    SavedConfig[8] += (controlKey[7] & 0xF) << 4;
+
+    SavedConfig[9] = controlKey[8] & 0xF;
+    SavedConfig[9] += (controlKey[9] & 0xF) << 4;
+
+    SavedConfig[10] = controlKey[10] & 0xF;
+    SavedConfig[10] += (controlKey[11] & 0xF) << 4;
+
+    SavedConfig[11] = controlKey[12] & 0xF;
+    SavedConfig[11] += (TextureFilter & 0x3) << 4; //0-2
+    SavedConfig[11] += (Autorun & 0x3) << 6; //0-2
+    
+    SavedConfig[12] = 0xCE; //valid save id
+}
+
+void M_DecodeConfig()
+{
+    int i;
+    int controlKey[13];
+
+    if (SavedConfig[12] != 0xCE) return;
+
+    FeaturesUnlocked = SavedConfig[0] & 0x1;
+    enable_messages = (SavedConfig[0] >> 1) & 0x1;
+    enable_statusbar = (SavedConfig[0] >> 2) & 0x1;
+    ConfgNumb = (SavedConfig[0] >> 3) & 0x7;
+
+    MusVolume = SavedConfig[1];
+
+    SfxVolume = SavedConfig[2];
+
+    brightness = SavedConfig[3];
+
+    M_SENSITIVITY = SavedConfig[4];
+
+    controlKey[0] = SavedConfig[5] & 0xF;
+    controlKey[1] = (SavedConfig[5] >> 4) & 0xF;
+    
+    controlKey[2] = SavedConfig[6] & 0xF;
+    controlKey[3] = (SavedConfig[6] >> 4) & 0xF;
+
+    controlKey[4] = SavedConfig[7] & 0xF;
+    controlKey[5] = (SavedConfig[7] >> 4) & 0xF;
+
+    controlKey[6] = SavedConfig[8] & 0xF;
+    controlKey[7] = (SavedConfig[8] >> 4) & 0xF;
+
+    controlKey[8] = SavedConfig[9] & 0xF;
+    controlKey[9] = (SavedConfig[9] >> 4) & 0xF;
+
+    controlKey[10] = SavedConfig[10] & 0xF;
+    controlKey[11] = (SavedConfig[10] >> 4) & 0xF;
+
+    controlKey[12] = SavedConfig[11] & 0xF;
+
+    for (i = 0; i < 13; i++)
+    {
+        if (controlKey[i] == 0)
+        {
+            ActualConfiguration[i] = PAD_A;
+        }
+        else if (controlKey[i] == 1)
+        {
+            ActualConfiguration[i] = PAD_B;
+        }
+        else if (controlKey[i] == 2)
+        {
+            ActualConfiguration[i] = PAD_DOWN;
+        }
+        else if (controlKey[i] == 3)
+        {
+            ActualConfiguration[i] = PAD_DOWN_C;
+        }
+        else if (controlKey[i] == 4)
+        {
+            ActualConfiguration[i] = PAD_L_TRIG;
+        }
+        else if (controlKey[i] == 5)
+        {
+            ActualConfiguration[i] = PAD_LEFT;
+        }
+        else if (controlKey[i] == 6)
+        {
+            ActualConfiguration[i] = PAD_LEFT_C;
+        }
+        else if (controlKey[i] == 7)
+        {
+            ActualConfiguration[i] = PAD_R_TRIG;
+        }
+        else if (controlKey[i] == 8)
+        {
+            ActualConfiguration[i] = PAD_RIGHT;
+        }
+        else if (controlKey[i] == 9)
+        {
+            ActualConfiguration[i] = PAD_RIGHT_C;
+        }
+        else if (controlKey[i] == 10)
+        {
+            ActualConfiguration[i] = PAD_START;
+        }
+        else if (controlKey[i] == 11)
+        {
+            ActualConfiguration[i] = PAD_UP;
+        }
+        else if (controlKey[i] == 12)
+        {
+            ActualConfiguration[i] = PAD_UP_C;
+        }
+        else if (controlKey[i] == 13)
+        {
+            ActualConfiguration[i] = PAD_Z_TRIG;
+        }
+    }
+
+    TextureFilter = (SavedConfig[11] >> 4) & 0x3;
+    Autorun = (SavedConfig[11] >> 6) & 0x3;
+
+    S_SetMusicVolume(MusVolume);
+	S_SetSoundVolume(SfxVolume);
+}
+
 int M_RunTitle(void) // 80007630
 {
     int exit;
+    boolean hasPak;
+    boolean hasSave;
 
+    hasPak = I_CheckControllerPak() == 0;
+    hasSave = I_ReadPakFile() == 0;
     DrawerStatus = 0;
     startskill = sk_easy;
     startmap = 1;
     MenuIdx = 0;
-    MenuItem = Menu_Title;
+    MenuItem =  hasPak && hasSave ? Menu_Title : Menu_TitleNoSave;
     MenuCall = M_MenuTitleDrawer;
     text_alpha = 0;
-    itemlines = 2;
+    itemlines = hasPak && hasSave ? 3 : 2;
     cursorpos = 0;
     last_ticon = 0;
 
@@ -617,7 +841,7 @@ void M_MenuGameDrawer(void) // 80007C48
 
         M_DrawBackground(56, 57, 80, "TITLE");
 
-        if (MenuItem != Menu_Title) {
+        if (MenuItem != Menu_Title && MenuItem != Menu_TitleNoSave) {
             M_DrawOverlay(0, 0, 320, 240, 96);
         }
 
@@ -652,7 +876,7 @@ int M_MenuTicker(void) // 80007E0C
         last_ticon = ticon;
 
     /* exit menu if time out */
-    if ((MenuItem == Menu_Title) && ((ticon - last_ticon) >= 900)) // 30 * TICRATE
+    if ((MenuItem == Menu_Title || MenuItem == Menu_TitleNoSave) && ((ticon - last_ticon) >= 900)) // 30 * TICRATE
     {
         exit = ga_timeout;
     }
@@ -692,6 +916,7 @@ int M_MenuTicker(void) // 80007E0C
         if ((buttons & PAD_START) && !(oldticbuttons[0] & PAD_START))
         {
             if ((MenuItem == Menu_Title) ||
+                (MenuItem == Menu_TitleNoSave) ||
                 (MenuItem == Menu_ControllerPakBad) ||
                 (MenuItem == Menu_CreateNote) ||
                 (MenuItem == Menu_ControllerPakFull))
@@ -772,26 +997,8 @@ int M_MenuTicker(void) // 80007E0C
                         S_StartSound(NULL, sfx_pistol);
                         M_SaveMenuData();
 
-                        ret = I_CheckControllerPak();
-                        exit = ga_exit;
-
-                        if (ret == 0)
-                        {
-                            if (I_ReadPakFile() == 0)
-                            {
-                                EnableExpPak = 1;
-                                MenuCall = M_LoadPakDrawer;
-                                exit = MiniLoop(M_LoadPakStart,M_LoadPakStop,M_LoadPakTicker,M_MenuGameDrawer);
-                            }
-                            else
-                                exit = ga_exit;
-                        }
-
-                        if (exit == ga_exit)
-                        {
-                            MenuCall = M_PasswordDrawer;
-                            exit = MiniLoop(M_PasswordStart,M_PasswordStop,M_PasswordTicker,M_MenuGameDrawer);
-                        }
+                        MenuCall = M_PasswordDrawer;
+                        exit = MiniLoop(M_PasswordStart,M_PasswordStop,M_PasswordTicker,M_MenuGameDrawer);
 
                         if (exit == ga_exit)
                         {
@@ -799,12 +1006,6 @@ int M_MenuTicker(void) // 80007E0C
                             return ga_nothing;
                         }
 
-                        if (EnableExpPak != 0)
-                        {
-                            return exit;
-                        }
-
-                        EnableExpPak = (M_ControllerPak() == 0);
                         return exit;
                     }
                     break;
@@ -1577,6 +1778,43 @@ int M_MenuTicker(void) // 80007E0C
                         }
                     }
                     break;
+
+                case 55: // LOAD GAME
+                    if (truebuttons)
+                    {
+                        S_StartSound(NULL, sfx_pistol);
+                        M_SaveMenuData();
+
+                        ret = I_CheckControllerPak();
+                        exit = ga_exit;
+
+                        if (ret == 0)
+                        {
+                            if (I_ReadPakFile() == 0)
+                            {
+                                EnableExpPak = 1;
+                                MenuCall = M_LoadPakDrawer;
+                                exit = MiniLoop(M_LoadPakStart,M_LoadPakStop,M_LoadPakTicker,M_MenuGameDrawer);
+                            }
+                            else
+                                exit = ga_exit;
+                        }
+
+                        if (exit == ga_exit)
+                        {
+                            M_RestoreMenuData(true);
+                            return ga_nothing;
+                        }
+
+                        if (EnableExpPak != 0)
+                        {
+                            return exit;
+                        }
+
+                        EnableExpPak = (M_ControllerPak() == 0);
+                        return exit;
+                    }
+                    break;
                 }
 
             exit = ga_nothing;
@@ -1599,43 +1837,43 @@ void M_MenuTitleDrawer(void) // 80008E7C
     if (MenuItem == Menu_Game)
     {
         ST_DrawString(-1, 20, "Pause", text_alpha | 0xc0000000);
-        ST_DrawString(-1, 200, "press \x8d to resume", text_alpha | 0xffffff00);
-    }
-    else if (MenuItem == Menu_Skill)
-    {
-        ST_DrawString(-1, 20, "Choose Your Skill...", text_alpha | 0xc0000000);
-    }
-    else if (MenuItem == Menu_Episode)
-    {
-        ST_DrawString(-1, 20, "Choose Campaign", text_alpha | 0xc0000000);
-    }
-    else if (MenuItem == Menu_Options)
-    {
-        ST_DrawString(-1, 20, "Options", text_alpha | 0xc0000000);
-    }
-    else if (MenuItem == Menu_Quit)
-    {
-        ST_DrawString(-1, 20, "Quit Game?", text_alpha | 0xc0000000);
-    }
-    else if (MenuItem == Menu_DeleteNote)
-    {
-        ST_DrawString(-1, 20, "Delete Game Note?", text_alpha | 0xc0000000);
-    }
-    else if (MenuItem == Menu_ControllerPakBad)
-    {
-        ST_DrawString(-1, 20, "Controller Pak Bad", text_alpha | 0xc0000000);
-    }
-    else if (MenuItem == Menu_ControllerPakFull)
-    {
-        ST_DrawString(-1, 20, "Controller Pak Full", text_alpha | 0xc0000000);
-    }
-    else if (MenuItem == Menu_CreateNote)
-    {
-        ST_DrawString(-1, 20, "Create Game Note?", text_alpha | 0xc0000000);
-    }
+            ST_DrawString(-1, 200, "press \x8d to resume", text_alpha | 0xffffff00);
+        }
+        else if (MenuItem == Menu_Skill)
+        {
+            ST_DrawString(-1, 20, "Choose Your Skill...", text_alpha | 0xc0000000);
+        }
+        else if (MenuItem == Menu_Episode)
+        {
+            ST_DrawString(-1, 20, "Choose Campaign", text_alpha | 0xc0000000);
+        }
+        else if (MenuItem == Menu_Options)
+        {
+            ST_DrawString(-1, 20, "Options", text_alpha | 0xc0000000);
+        }
+        else if (MenuItem == Menu_Quit)
+        {
+            ST_DrawString(-1, 20, "Quit Game?", text_alpha | 0xc0000000);
+        }
+        else if (MenuItem == Menu_DeleteNote)
+        {
+            ST_DrawString(-1, 20, "Delete Game Note?", text_alpha | 0xc0000000);
+        }
+        else if (MenuItem == Menu_ControllerPakBad)
+        {
+            ST_DrawString(-1, 20, "Controller Pak Bad", text_alpha | 0xc0000000);
+        }
+        else if (MenuItem == Menu_ControllerPakFull)
+        {
+            ST_DrawString(-1, 20, "Controller Pak Full", text_alpha | 0xc0000000);
+        }
+        else if (MenuItem == Menu_CreateNote)
+        {
+            ST_DrawString(-1, 20, "Create Game Note?", text_alpha | 0xc0000000);
+        }
 
-    item = MenuItem;
-    for(i = 0; i < itemlines; i++)
+        item = MenuItem;
+        for(i = 0; i < itemlines; i++)
     {
         ST_DrawString(item->x, item->y, MenuText[item->casepos], text_alpha | 0xc0000000);
         item++;
@@ -2298,8 +2536,12 @@ int M_SavePakTicker(void) // 8000A804
     {
         if ((buttons != oldbuttons) && (buttons == (PAD_RIGHT_C|PAD_LEFT_C)))
         {
-            // save the next level number and password data in text format
-            sprintf(&Pak_Data[cursorpos * 32], "level %2.2d", nextmap);
+            // save label data
+            sprintf(&Pak_Data[cursorpos * 32], "%2.2d%.1d", nextmap, gameskill);
+            // save configuration
+            M_EncodeConfig();
+            D_memcpy(&Pak_Data[(cursorpos * 32) + 3], &SavedConfig, 13);
+            // save the next password data in text format
             D_memcpy(&Pak_Data[(cursorpos * 32) + 16], &Passwordbuff, 16);
 
             if (I_SavePakFile(File_Num, PFS_WRITE, Pak_Data, Pak_Size) == 0) {
@@ -2328,6 +2570,7 @@ void M_SavePakDrawer(void) // 8000AB44
 {
     int i;
     char buffer[36];
+    char savedata[3];
 
     I_ClearFrame();
 
@@ -2361,21 +2604,44 @@ void M_SavePakDrawer(void) // 8000AB44
                 D_memmove(buffer, "empty");
             }
             else {
-                D_memmove(buffer, &Pak_Data[i * 32]);
+                D_memmove(savedata, &Pak_Data[i * 32]);
+                switch ((int)(savedata[2] - '0'))
+                {
+                    #if ENABLE_NIGHTMARE == 1
+                    case 4:
+                        sprintf(buffer, "Level: %c%c Skill: %s", savedata[0], savedata[1], M_TXT19);
+                        break;
+                    #endif
+                    case 3:
+                        sprintf(buffer, "Level: %c%c Skill: %s", savedata[0], savedata[1], M_TXT18);
+                        break;
+                    case 2:
+                        sprintf(buffer, "Level: %c%c Skill: %s", savedata[0], savedata[1], M_TXT17);
+                        break;
+                    case 1:
+                        sprintf(buffer, "Level: %c%c Skill: %s", savedata[0], savedata[1], M_TXT16);
+                        break;
+                    case 0:
+                        sprintf(buffer, "Level: %c%c Skill: %s", savedata[0], savedata[1], M_TXT15);
+                        break;
+                    default:
+                        sprintf(buffer, "Level: %c%c Skill: %c", savedata[0], savedata[1], savedata[2]);
+                        break;
+                }
             }
 
-            ST_DrawString(60, (i - linepos) * 15 + 65, buffer, text_alpha | 0xc0000000);
+            ST_DrawString(23, (i - linepos) * 15 + 65, buffer, text_alpha | 0xc0000000);
         }
 
         if (linepos != 0) {
-            ST_DrawString(60, 50, "\x8f more...", text_alpha | 0xffffff00);
+            ST_DrawString(23, 50, "\x8f more...", text_alpha | 0xffffff00);
         }
 
         if ((linepos + 6) <= ((Pak_Size >> 5) - 1)) {
-            ST_DrawString(60, 155, "\x8e more...", text_alpha | 0xffffff00);
+            ST_DrawString(23, 155, "\x8e more...", text_alpha | 0xffffff00);
         }
 
-        ST_DrawSymbol(23, (cursorpos - linepos) * 15 + 56, MenuAnimationTic + 70, text_alpha | 0xffffff00);
+        ST_DrawSymbol(11, (cursorpos - linepos) * 15 + 66, 78, text_alpha | 0xffffff00);
 
         ST_DrawString(-1, 195, "press \x8d to exit", text_alpha | 0xffffff00);
         ST_DrawString(-1, 210, "press \x84\x85 to save", text_alpha | 0xffffff00);
@@ -2498,6 +2764,9 @@ int M_LoadPakTicker(void) // 8000AFE4
         }
         else
         {
+            // load configuration
+            D_memcpy(&SavedConfig, &Pak_Data[((cursorpos * 32) + 3)], 13);
+            M_DecodeConfig();
             // load the password data in text format
             D_memcpy(&Passwordbuff, &Pak_Data[((cursorpos * 32) + 16)], 16);
 
@@ -2530,6 +2799,7 @@ void M_LoadPakDrawer(void) // 8000B270
 {
     int i;
     char buffer[32];
+    char savedata[3];
 
     ST_DrawString(-1, 20, "Controller Pak", text_alpha | 0xc0000000);
 
@@ -2542,21 +2812,44 @@ void M_LoadPakDrawer(void) // 8000B270
             D_memmove(buffer, "no save");
         }
         else {
-            D_memmove(buffer, &Pak_Data[i * 32]);
+            D_memmove(savedata, &Pak_Data[i * 32]);
+            switch ((int)(savedata[2] - '0'))
+            {
+                #if ENABLE_NIGHTMARE == 1
+                case 4:
+                    sprintf(buffer, "Level: %c%c Skill: %s", savedata[0], savedata[1], M_TXT19);
+                    break;
+                #endif
+                case 3:
+                    sprintf(buffer, "Level: %c%c Skill: %s", savedata[0], savedata[1], M_TXT18);
+                    break;
+                case 2:
+                    sprintf(buffer, "Level: %c%c Skill: %s", savedata[0], savedata[1], M_TXT17);
+                    break;
+                case 1:
+                    sprintf(buffer, "Level: %c%c Skill: %s", savedata[0], savedata[1], M_TXT16);
+                    break;
+                case 0:
+                    sprintf(buffer, "Level: %c%c Skill: %s", savedata[0], savedata[1], M_TXT15);
+                    break;
+                default:
+                    sprintf(buffer, "Level: %c%c Skill: %c", savedata[0], savedata[1], savedata[2]);
+                    break;
+            }
         }
 
-        ST_DrawString(60, (i - linepos) * 15 + 65, buffer, text_alpha | 0xc0000000);
+        ST_DrawString(23, (i - linepos) * 15 + 65, buffer, text_alpha | 0xc0000000);
     }
 
     if (linepos != 0) {
-        ST_DrawString(60, 50, "\x8f more...", text_alpha | 0xffffff00);
+        ST_DrawString(23, 50, "\x8f more...", text_alpha | 0xffffff00);
     }
 
     if ((linepos + 6) <= ((Pak_Size >> 5) - 1)) {
-        ST_DrawString(60, 155, "\x8e more...", text_alpha | 0xffffff00);
+        ST_DrawString(23, 155, "\x8e more...", text_alpha | 0xffffff00);
     }
 
-    ST_DrawSymbol(23, (cursorpos - linepos) * 15 + 56, MenuAnimationTic + 70, text_alpha | 0xffffff00);
+    ST_DrawSymbol(11, (cursorpos - linepos) * 15 + 66, 78, text_alpha | 0xffffff00);
 
     ST_DrawString(-1, 195, "press \x8D to exit", text_alpha | 0xffffff00);
     ST_DrawString(-1, 210, "press \x84\x85 to load", text_alpha | 0xffffff00);
