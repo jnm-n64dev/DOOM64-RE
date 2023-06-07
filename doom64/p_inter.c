@@ -511,7 +511,7 @@ void P_TouchSpecialThing (mobj_t *special, mobj_t *toucher) // 80014810
 		if (!P_GiveBody(player, 25))
 			return;
 		if (player->health < 50)
-			message = "You pick up a medikit that you REALLY need!";
+			message = "You pick up a medikit that you\nREALLY need!";
 		else
 			message = "You pick up a medikit.";
 		break;
