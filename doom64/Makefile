@@ -164,3 +164,5 @@ $(MASTER): $(TARGETS)
 	@copy $(TARGETS) $(MASTER)
 	@Tools\nrdc -p -d -c -t"$(SRBTXT)" $(MASTER)>$(MASTER).txt
 	@copy $(MASTER).txt con
+	@del $(MASTER).z64
+	@ren $(MASTER) $(MASTER).z64
