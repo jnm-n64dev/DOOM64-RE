@@ -90,6 +90,7 @@ char *ControlText[] =   //8007517C
 #define M_TXT53 "Artifacts"
 #define M_TXT54 "Skill"
 #define M_TXT55 "Load Game"
+#define M_TXT56 "Blood Color:"
 
 char *MenuText[] =   // 8005ABA0
 {
@@ -104,7 +105,8 @@ char *MenuText[] =   // 8005ABA0
     M_TXT40, M_TXT41, M_TXT42, M_TXT43, M_TXT44,
     M_TXT45, M_TXT46, M_TXT47,
     M_TXT48, M_TXT49, M_TXT50,  // [GEC] NEW
-    M_TXT51, M_TXT52, M_TXT53, M_TXT54, M_TXT55
+    M_TXT51, M_TXT52, M_TXT53, M_TXT54,
+    M_TXT55, M_TXT56
 };
 
 menuitem_t Menu_Title[3] = // 8005A978
@@ -167,15 +169,16 @@ menuitem_t Menu_ControlStick[3] = // 8005AA38
     {  6, 102, 150},    // Return
 };
 
-menuitem_t Menu_Display[7] = // 8005AA5C
+menuitem_t Menu_Display[8] = // 8005AA5C
 {
     {  9, 102, 60 },    // Brightness
     { 32, 102, 100},    // Center Display
     { 33, 102, 120},    // Messages
     { 34, 102, 140},    // Status Bar
     { 50, 102, 160},    // Filtering
-    { 13, 102, 180},    // Default Display
-    {  6, 102, 200},    // Return
+    { 56, 102, 180},    // Blood Color
+    { 13, 102, 200},    // Default Display
+    {  6, 102, 220},    // Return
 };
 
 menuitem_t Menu_Game[4] = // 8005AAA4
@@ -289,6 +292,7 @@ boolean FeaturesUnlocked = false; // 8005A7D0
 int TextureFilter = 0;
 int Autorun = 0;
 byte SavedConfig[13];
+boolean GreenBlood;
 
 int TempConfiguration[13] = // 8005A80C
 {
@@ -366,7 +370,8 @@ void M_EncodeConfig(void)
     SavedConfig[0] += (enable_messages & 0x1) << 1;
     SavedConfig[0] += (enable_statusbar & 0x1) << 2;
     SavedConfig[0] += (ConfgNumb & 0x7) << 3; //0-4
-    //2 bits free
+    SavedConfig[0] += (GreenBlood & 0x1) << 6;
+    //1 bit free
 
     SavedConfig[1] = MusVolume;
     
@@ -472,6 +477,7 @@ void M_DecodeConfig()
     enable_messages = (SavedConfig[0] >> 1) & 0x1;
     enable_statusbar = (SavedConfig[0] >> 2) & 0x1;
     ConfgNumb = (SavedConfig[0] >> 3) & 0x7;
+    GreenBlood = (SavedConfig[0] >> 6) & 0x1;
 
     MusVolume = SavedConfig[1];
 
@@ -981,7 +987,7 @@ int M_MenuTicker(void) // 80007E0C
                         M_SaveMenuData();
 
                         MenuItem = Menu_Display;
-                        itemlines = 6;
+                        itemlines = 8;
                         MenuCall = M_DisplayDrawer;
                         cursorpos = 0;
 
@@ -1223,6 +1229,7 @@ int M_MenuTicker(void) // 80007E0C
                         P_RefreshBrightness();
 
                         TextureFilter = 0;
+                        GreenBlood = 0;
                         return ga_nothing;
                     }
                     break;
@@ -1544,6 +1551,14 @@ int M_MenuTicker(void) // 80007E0C
                     {
                         S_StartSound(NULL, sfx_switch2);
                         enable_statusbar ^= true;
+                    }
+                    break;
+
+                case 56: // Blood Color
+                    if (truebuttons)
+                    {
+                        S_StartSound(NULL, sfx_switch2);
+                        GreenBlood ^= true;
                     }
                     break;
 
@@ -2052,7 +2067,7 @@ void M_DisplayDrawer(void) // 80009884
 
     item = Menu_Display;
 
-    for(i = 0; i < 6; i++)
+    for(i = 0; i < 8; i++)
     {
         casepos = item->casepos;
 
@@ -2085,6 +2100,13 @@ void M_DisplayDrawer(void) // 80009884
                     text = "On";
                     break;
             }
+        }
+        else if (casepos == 56) // BloodColor
+        {
+            if (GreenBlood)
+                text = "Green";
+            else
+                text = "Red";
         }
         else
         {

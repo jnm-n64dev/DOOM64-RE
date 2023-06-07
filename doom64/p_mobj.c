@@ -400,9 +400,17 @@ void P_SpawnBlood (fixed_t x, fixed_t y, fixed_t z, int damage) // 800192B8
         if (th->tics<1)
             th->tics = 1;
         if (damage <= 12 && damage >= 9)
-            P_SetMobjState (th, S_495);
+		{
+            P_SetMobjState (th, GreenBlood ? S_798 : S_495);
+		}
         else if (damage < 9)
-            P_SetMobjState (th, S_496);
+		{
+            P_SetMobjState (th, GreenBlood ? S_799 : S_496);
+		}
+		else if (GreenBlood)
+		{
+			P_SetMobjState (th, S_797);
+		}
     }
 }
 

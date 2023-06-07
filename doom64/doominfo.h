@@ -129,6 +129,7 @@ typedef enum {
     SPR_PLAS,
     SPR_BFGG,
     SPR_LASR,
+    SPR_GBLD,
     NUMSPRITES
 } spritenum_t;
 
@@ -931,6 +932,10 @@ typedef enum
     S_794,
     S_795,
     S_796,
+    S_797,
+    S_798,
+    S_799,
+    S_800,
 	NUMSTATES
 } statenum_t;
 

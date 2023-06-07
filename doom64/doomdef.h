@@ -809,6 +809,7 @@ extern int M_SENSITIVITY;           // 8005A7CC
 extern boolean FeaturesUnlocked;    // 8005A7D0
 extern int TextureFilter;
 extern int Autorun;
+extern boolean GreenBlood;
 
 int M_RunTitle(void); // 80007630
 

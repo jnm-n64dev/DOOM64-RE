@@ -17,7 +17,7 @@ char *sprnames[NUMSPRITES] = { // 8005EE30
 "A001", "A012", "A010", "A018", "A017", "A026", "A022", "A028",
 "A029", "A035", "A036", "TRE3", "TRE2", "TRE1", "A013", "A019",
 "A004", "A005", "A023", "SAWG", "PUNG", "PISG", "SHT1", "SHT2",
-"CHGG", "ROCK", "PLAS", "BFGG", "LASR"
+"CHGG", "ROCK", "PLAS", "BFGG", "LASR", "GBLD"
 };
 
 void A_WeaponReady();
@@ -892,7 +892,11 @@ state_t	states[NUMSTATES] = // 8004D3F4
 	{ SPR_LASR,0,1,A_Raise,S_793 },		/*S_793*/
 	{ SPR_LASR,0,8,A_FireLaser,S_795 },		/*S_794*/
 	{ SPR_LASR,0,3,A_ReFire,S_791 },		/*S_795*/
-	{ SPR_LASR,32769,3,NULL,S_000 }		/*S_796*/
+	{ SPR_LASR,32769,3,NULL,S_000 },		/*S_796*/
+   	{ SPR_GBLD,0,6,NULL,S_798 },		/*S_797*/
+	{ SPR_GBLD,1,6,NULL,S_799 },		/*S_798*/
+	{ SPR_GBLD,2,6,NULL,S_800 },		/*S_799*/
+	{ SPR_GBLD,3,6,NULL,S_000 }		/*S_800*/
 };
 
 mobjinfo_t mobjinfo[NUMMOBJTYPES] = // 80051238
