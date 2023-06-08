@@ -36,6 +36,8 @@ extern u32 cfb[2][SCREEN_WD*SCREEN_HT]; // 8036A000
 // FIXES
 #define FIX_LINEDEFS_DELETION   1   // Fixes for the 'linedef deletion' bug. From PsyDoom
 
+#define ENABLE_EXTRA_EPISODES	1
+
 /*============================================================================= */
 
 /* all external data is defined here */
@@ -119,7 +121,11 @@ typedef enum
 	ga_exit
 } gameaction_t;
 
+#if ENABLE_EXTRA_EPISODES == 1
 #define LASTLEVEL 41
+#else
+#define LASTLEVEL 34
+#endif
 #define FUNLEVEL(map)	((map == 25 || map == 26 || map == 27 || map == 40))
 
 /* */

@@ -1251,6 +1251,8 @@ int M_MenuTicker(void) // 80007E0C
                 case 14: // New Game
                     if (truebuttons)
                     {
+                        #if ENABLE_EXTRA_EPISODES == 1
+
                         S_StartSound(NULL, sfx_pistol);
                         M_SaveMenuData();
 
@@ -1269,6 +1271,30 @@ int M_MenuTicker(void) // 80007E0C
                             return ga_nothing;
 
                         return exit;
+
+                        #else
+                        
+                        S_StartSound(NULL, sfx_pistol);
+                        M_FadeOutStart(8);
+
+                        // Check ControllerPak
+                        EnableExpPak = (M_ControllerPak() == 0);
+
+                        MenuItem = Menu_Skill;
+                        #if ENABLE_NIGHTMARE == 1
+                        itemlines = 5;
+                        #else
+                        itemlines = 4;
+                        #endif // ENABLE_NIGHTMARE
+                        MenuCall = M_MenuTitleDrawer;
+                        cursorpos = 1;  // Set Default Bring it on!
+
+                        MiniLoop(M_FadeInStart, M_MenuClearCall, M_MenuTicker, M_MenuGameDrawer);
+                        startskill = MenuItem[cursorpos].casepos - 15;
+
+                        return ga_exit;
+
+                        #endif
                     }
                     break;
 
@@ -1364,8 +1390,8 @@ int M_MenuTicker(void) // 80007E0C
                         {
                             m_actualmap -= (m_actualmap == 34) ? 2 : 1;
 
-                            if (m_actualmap > 40)
-                                m_actualmap = 40;
+                            if (m_actualmap > LASTLEVEL-1)
+                                m_actualmap = LASTLEVEL-1;
 
                             if (m_actualmap > 0)
                             {
@@ -1377,12 +1403,12 @@ int M_MenuTicker(void) // 80007E0C
                         else if (buttons & PAD_RIGHT)
                         {
                             m_actualmap += (m_actualmap == 32) ? 2 : 1;
-                            if (m_actualmap < 41)
+                            if (m_actualmap < LASTLEVEL)
                             {
                                 S_StartSound(NULL, sfx_switch2);
                                 return ga_nothing;
                             }
-                            m_actualmap = 40;
+                            m_actualmap = (LASTLEVEL == 34) ? LASTLEVEL-2 : LASTLEVEL-1;
                         }
                         else if (buttons & ALL_CBUTTONS)
                         {
