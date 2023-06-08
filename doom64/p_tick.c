@@ -164,13 +164,21 @@ void P_CheckCheats (void) // 8002187C
             lastticon = ticon;
 
             MenuCall = M_MenuTitleDrawer;
-            MenuItem = Menu_Game;
             cursorpos = 0;
 
-            if (FeaturesUnlocked == false)
-                itemlines = 3;
+            if (EnableExpPak)
+            {
+                MenuItem = Menu_Game;
+                itemlines = 4;
+            }
             else
-                itemlines = 4;  // Enable cheat menu
+            {
+                MenuItem = Menu_GameNoSave;
+                itemlines = 3;
+            }
+
+            if (FeaturesUnlocked)
+                itemlines++;  // Enable cheat menu
 
             MenuIdx = 0;
             text_alpha = 255;

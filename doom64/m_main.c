@@ -183,7 +183,16 @@ menuitem_t Menu_Display[9] = // 8005AA5C
     {  6, 102, 220},    // Return
 };
 
-menuitem_t Menu_Game[4] = // 8005AAA4
+menuitem_t Menu_Game[5] = // 8005AAA4
+{
+    { 11, 122, 80 },    // Options
+    {  4, 122, 100},    // Main Menu
+    {  5, 122, 120},    // Restart Level
+    { 55, 122, 140},    // Load Game
+    { 22, 122, 160},    // Features
+};
+
+menuitem_t Menu_GameNoSave[4] =
 {
     { 11, 122, 80 },    // Options
     {  4, 122, 100},    // Main Menu
@@ -1862,7 +1871,7 @@ void M_MenuTitleDrawer(void) // 80008E7C
     menuitem_t *item;
     int i;
 
-    if (MenuItem == Menu_Game)
+    if (MenuItem == Menu_Game || MenuItem == Menu_GameNoSave)
     {
         ST_DrawString(-1, 20, "Pause", text_alpha | 0xc0000000);
             ST_DrawString(-1, 200, "press \x8d to resume", text_alpha | 0xffffff00);
