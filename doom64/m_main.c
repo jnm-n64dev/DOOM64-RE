@@ -91,6 +91,7 @@ char *ControlText[] =   //8007517C
 #define M_TXT54 "Skill"
 #define M_TXT55 "Load Game"
 #define M_TXT56 "Blood Color:"
+#define M_TXT57 "Cross Color:"
 
 char *MenuText[] =   // 8005ABA0
 {
@@ -106,7 +107,7 @@ char *MenuText[] =   // 8005ABA0
     M_TXT45, M_TXT46, M_TXT47,
     M_TXT48, M_TXT49, M_TXT50,  // [GEC] NEW
     M_TXT51, M_TXT52, M_TXT53, M_TXT54,
-    M_TXT55, M_TXT56
+    M_TXT55, M_TXT56, M_TXT57
 };
 
 menuitem_t Menu_Title[3] = // 8005A978
@@ -169,14 +170,15 @@ menuitem_t Menu_ControlStick[3] = // 8005AA38
     {  6, 102, 150},    // Return
 };
 
-menuitem_t Menu_Display[8] = // 8005AA5C
+menuitem_t Menu_Display[9] = // 8005AA5C
 {
-    {  9, 102, 60 },    // Brightness
-    { 32, 102, 100},    // Center Display
-    { 33, 102, 120},    // Messages
-    { 34, 102, 140},    // Status Bar
-    { 50, 102, 160},    // Filtering
-    { 56, 102, 180},    // Blood Color
+    {  9, 102, 40 },    // Brightness
+    { 32, 102, 80 },    // Center Display
+    { 33, 102, 100},    // Messages
+    { 34, 102, 120},    // Status Bar
+    { 50, 102, 140},    // Filtering
+    { 56, 102, 160},    // Blood Color
+    { 57, 102, 180},    // Cross Color
     { 13, 102, 200},    // Default Display
     {  6, 102, 220},    // Return
 };
@@ -293,6 +295,7 @@ int TextureFilter = 0;
 int Autorun = 0;
 byte SavedConfig[13];
 boolean GreenBlood;
+boolean WhiteCross;
 
 int TempConfiguration[13] = // 8005A80C
 {
@@ -371,7 +374,7 @@ void M_EncodeConfig(void)
     SavedConfig[0] += (enable_statusbar & 0x1) << 2;
     SavedConfig[0] += (ConfgNumb & 0x7) << 3; //0-4
     SavedConfig[0] += (GreenBlood & 0x1) << 6;
-    //1 bit free
+    SavedConfig[0] += (WhiteCross & 0x1) << 7;
 
     SavedConfig[1] = MusVolume;
     
@@ -478,6 +481,7 @@ void M_DecodeConfig()
     enable_statusbar = (SavedConfig[0] >> 2) & 0x1;
     ConfgNumb = (SavedConfig[0] >> 3) & 0x7;
     GreenBlood = (SavedConfig[0] >> 6) & 0x1;
+    WhiteCross = (SavedConfig[0] >> 7) & 0x1;
 
     MusVolume = SavedConfig[1];
 
@@ -987,7 +991,7 @@ int M_MenuTicker(void) // 80007E0C
                         M_SaveMenuData();
 
                         MenuItem = Menu_Display;
-                        itemlines = 8;
+                        itemlines = 9;
                         MenuCall = M_DisplayDrawer;
                         cursorpos = 0;
 
@@ -1230,6 +1234,7 @@ int M_MenuTicker(void) // 80007E0C
 
                         TextureFilter = 0;
                         GreenBlood = 0;
+                        WhiteCross = 0;
                         return ga_nothing;
                     }
                     break;
@@ -1559,6 +1564,14 @@ int M_MenuTicker(void) // 80007E0C
                     {
                         S_StartSound(NULL, sfx_switch2);
                         GreenBlood ^= true;
+                    }
+                    break;
+
+                case 57: // Cross Color
+                    if (truebuttons)
+                    {
+                        S_StartSound(NULL, sfx_switch2);
+                        WhiteCross ^= true;
                     }
                     break;
 
@@ -2067,7 +2080,7 @@ void M_DisplayDrawer(void) // 80009884
 
     item = Menu_Display;
 
-    for(i = 0; i < 8; i++)
+    for(i = 0; i < 9; i++)
     {
         casepos = item->casepos;
 
@@ -2108,6 +2121,13 @@ void M_DisplayDrawer(void) // 80009884
             else
                 text = "Red";
         }
+        else if (casepos == 57) // BloodColor
+        {
+            if (WhiteCross)
+                text = "White";
+            else
+                text = "Red";
+        }
         else
         {
             text = NULL;
@@ -2121,8 +2141,8 @@ void M_DisplayDrawer(void) // 80009884
         item++;
     }
 
-    ST_DrawSymbol(102, 80, 68, text_alpha | 0xffffff00);
-    ST_DrawSymbol(brightness + 103, 80, 69, text_alpha | 0xffffff00);
+    ST_DrawSymbol(102, 60, 68, text_alpha | 0xffffff00);
+    ST_DrawSymbol(brightness + 103, 60, 69, text_alpha | 0xffffff00);
 
     ST_DrawSymbol(Menu_Display[0].x - 37, Menu_Display[cursorpos].y - 9, MenuAnimationTic + 70, text_alpha | 0xffffff00);
 }

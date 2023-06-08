@@ -402,6 +402,8 @@ void R_AddSprite(subsector_t *sub) // 80024A98
 	fixed_t         x, y;
 	int numdraw;
 
+    state_t         *newState;
+
     sub->vissprite = NULL;
 
     for (thing = sub->sector->thinglist; thing; thing = thing->snext)
@@ -437,7 +439,26 @@ void R_AddSprite(subsector_t *sub) // 80024A98
             // too far off the side?
             if (tx > (tz << 1) || tx < -(tz << 1))
                 continue;
-
+            
+            if (thing->type == MT_ITEM_STIMPACK && thing->state == &states[thing->info->spawnstate])
+            {
+                newState = &states[WhiteCross ? S_801 : thing->info->spawnstate];
+                thing->sprite = newState->sprite;
+                thing->frame = newState->frame;
+            }
+            else if (thing->type == MT_ITEM_MEDKIT && thing->state == &states[thing->info->spawnstate])
+            {
+                newState = &states[WhiteCross ? S_802 : thing->info->spawnstate];
+                thing->sprite = newState->sprite;
+                thing->frame = newState->frame;
+            }
+            else if (thing->type == MT_ITEM_BERSERK && thing->state == &states[thing->info->spawnstate])
+            {
+                newState = &states[WhiteCross ? S_803 : thing->info->spawnstate];
+                thing->sprite = newState->sprite;
+                thing->frame = newState->frame;
+            }
+            
             sprdef = &sprites[thing->sprite];
             sprframe = &sprdef->spriteframes[thing->frame & FF_FRAMEMASK];
 
