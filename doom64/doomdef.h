@@ -817,7 +817,7 @@ extern boolean FeaturesUnlocked;    // 8005A7D0
 extern int TextureFilter;
 extern int Autorun;
 extern boolean GreenBlood;
-extern boolean WhiteCross;
+extern boolean BlueCross;
 
 int M_RunTitle(void); // 80007630
 

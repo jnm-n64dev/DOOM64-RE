@@ -304,7 +304,7 @@ int TextureFilter = 0;
 int Autorun = 0;
 byte SavedConfig[13];
 boolean GreenBlood;
-boolean WhiteCross;
+boolean BlueCross;
 
 int TempConfiguration[13] = // 8005A80C
 {
@@ -383,7 +383,7 @@ void M_EncodeConfig(void)
     SavedConfig[0] += (enable_statusbar & 0x1) << 2;
     SavedConfig[0] += (ConfgNumb & 0x7) << 3; //0-4
     SavedConfig[0] += (GreenBlood & 0x1) << 6;
-    SavedConfig[0] += (WhiteCross & 0x1) << 7;
+    SavedConfig[0] += (BlueCross & 0x1) << 7;
 
     SavedConfig[1] = MusVolume;
     
@@ -490,7 +490,7 @@ void M_DecodeConfig()
     enable_statusbar = (SavedConfig[0] >> 2) & 0x1;
     ConfgNumb = (SavedConfig[0] >> 3) & 0x7;
     GreenBlood = (SavedConfig[0] >> 6) & 0x1;
-    WhiteCross = (SavedConfig[0] >> 7) & 0x1;
+    BlueCross = (SavedConfig[0] >> 7) & 0x1;
 
     MusVolume = SavedConfig[1];
 
@@ -1243,7 +1243,7 @@ int M_MenuTicker(void) // 80007E0C
 
                         TextureFilter = 0;
                         GreenBlood = 0;
-                        WhiteCross = 0;
+                        BlueCross = 0;
                         return ga_nothing;
                     }
                     break;
@@ -1606,7 +1606,7 @@ int M_MenuTicker(void) // 80007E0C
                     if (truebuttons)
                     {
                         S_StartSound(NULL, sfx_switch2);
-                        WhiteCross ^= true;
+                        BlueCross ^= true;
                     }
                     break;
 
@@ -2158,8 +2158,8 @@ void M_DisplayDrawer(void) // 80009884
         }
         else if (casepos == 57) // BloodColor
         {
-            if (WhiteCross)
-                text = "White";
+            if (BlueCross)
+                text = "Blue";
             else
                 text = "Red";
         }
