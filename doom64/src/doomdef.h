@@ -586,10 +586,7 @@ extern fixed_t	FixedMul (fixed_t a, fixed_t b);
 extern fixed_t FixedDiv (fixed_t a, fixed_t b);
 extern fixed_t FixedDiv2(fixed_t a, fixed_t b);
 
-extern fixed_t D_abs(fixed_t x);
-
-//extern fixed_t FixedMul2 (fixed_t a, fixed_t b);// ASM MIPS CODE
-//extern fixed_t FixedDiv3 (fixed_t a, fixed_t b);// ASM MIPS CODE
+extern s32 D_abs(s32 x);
 
 #ifdef __BIG_ENDIAN__
 #define __BIG_ENDIAN__

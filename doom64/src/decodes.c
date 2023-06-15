@@ -8,7 +8,8 @@
 /* TYPES */
 /*=======*/
 
-typedef struct {
+typedef struct
+{
     int var0;
     int var1;
     int var2;
@@ -23,28 +24,18 @@ typedef struct {
 /* GLOBALS */
 /*=========*/
 
-static short ShiftTable[6] = {4, 6, 8, 10, 12, 14}; // 8005D8A0
+static short ShiftTable[6] = {4, 6, 8, 10, 12, 14};
 
-static int tableVar01[18];      // 800B2250
+static int tableVar01[18];
 
-static short *PtrEvenTbl;       // 800B2298
-static short *PtrOddTbl;        // 800B229C
-static short *PtrNumTbl1;       // 800B22A0
-static short *PtrNumTbl2;       // 800B22A4
+static short DecodeTable[2524];
+static short array01[1258];
 
-//static short EvenTable[0x275]; // DecodeTable[0]
-//static short OddTable[0x275];  // DecodeTable[0x278]
-//static short NumTable1[0x4EA]; // DecodeTable[0x4F0]
-//static short NumTable2[0x4EA]; // array01[0]
+static decoder_t decoder;
+static byte *allocPtr;
 
-static short DecodeTable[2524]; // 800B22A8
-static short array01[1258];     // 800B3660
-
-static decoder_t decoder;       // 800B4034
-static byte *allocPtr;          // 800B4054
-
-static int OVERFLOW_READ;       // 800B4058
-static int OVERFLOW_WRITE;      // 800B405C
+static int OVERFLOW_READ;
+static int OVERFLOW_WRITE;
 
 /*
 ============================================================================
@@ -61,12 +52,12 @@ DECODE BASED ROUTINES
 =
 ========================
 */
-
-static byte GetDecodeByte(void) // 8002D1D0
+static byte GetDecodeByte(void)
 {
     if ((int)(decoder.readPos - decoder.read) >= OVERFLOW_READ)
+    {
         return -1;
-
+    }
     return *decoder.readPos++;
 }
 
@@ -77,37 +68,13 @@ static byte GetDecodeByte(void) // 8002D1D0
 =
 ========================
 */
-
-static void WriteOutput(byte outByte) // 8002D214
+static void WriteOutput(byte outByte)
 {
     if ((int)(decoder.writePos - decoder.write) >= OVERFLOW_WRITE)
-        I_Error("Overflowed output buffer");
-
-    *decoder.writePos++ = outByte;
-}
-
-/*
-========================
-=
-= WriteBinary
-= routine required for encoding
-=
-========================
-*/
-
-static void WriteBinary(int binary) // 8002D288
-{
-    decoder.var3 = (decoder.var3 << 1);
-
-    if (binary != 0)
-        decoder.var3 = (decoder.var3 | 1);
-
-    decoder.var2 = (decoder.var2 + 1);
-    if (decoder.var2 == 8)
     {
-        WriteOutput((byte)decoder.var3);
-        decoder.var2 = 0;
+        I_Error("Overflowed output buffer");
     }
+    *decoder.writePos++ = outByte;
 }
 
 /*
@@ -117,8 +84,7 @@ static void WriteBinary(int binary) // 8002D288
 =
 ========================
 */
-
-static int DecodeScan(void) // 8002D2F4
+static int DecodeScan(void)
 {
     int resultbyte;
 
@@ -142,36 +108,12 @@ static int DecodeScan(void) // 8002D2F4
 /*
 ========================
 =
-= MakeExtraBinary
-= routine required for encoding
-=
-========================
-*/
-
-static void MakeExtraBinary(int binary, int shift) // 8002D364
-{
-    int i;
-
-    i = 0;
-    if (shift > 0)
-    {
-        do
-        {
-            WriteBinary(binary & 1);
-            binary = (binary >> 1);
-        } while (++i != shift);
-    }
-}
-
-/*
-========================
-=
 = RescanByte
 =
 ========================
 */
 
-static int RescanByte(int byte) // 8002D3B8
+static int RescanByte(int byte)
 {
     int shift;
     int i;
@@ -181,14 +123,16 @@ static int RescanByte(int byte) // 8002D3B8
     i = 0;
     shift = 1;
 
-    if(byte <= 0)
+    if (byte <= 0)
+    {
         return resultbyte;
-
+    }
     do
     {
         if (DecodeScan() != 0)
+        {
             resultbyte |= shift;
-
+        }
         i++;
         shift = (shift << 1);
     } while (i != byte);
@@ -199,28 +143,11 @@ static int RescanByte(int byte) // 8002D3B8
 /*
 ========================
 =
-= WriteEndCode
-= routine required for encoding
-=
-========================
-*/
-
-static void WriteEndCode(void) // 8002D424
-{
-    if (decoder.var2 > 0) {
-        WriteOutput((byte)(decoder.var3 << (8 - decoder.var2)) & 0xff);
-    }
-}
-
-/*
-========================
-=
 = InitDecodeTable
 =
 ========================
 */
-
-static void InitDecodeTable(void) // 8002D468
+static void InitDecodeTable(void)
 {
     int evenVal, oddVal, incrVal;
 
@@ -229,7 +156,7 @@ static void InitDecodeTable(void) // 8002D468
     short *evenTbl;
     short *oddTbl;
 
-	tableVar01[15] = 3;
+    tableVar01[15] = 3;
     tableVar01[16] = 0;
     tableVar01[17] = 0;
 
@@ -245,18 +172,20 @@ static void InitDecodeTable(void) // 8002D468
 
     do
     {
-        if(incrVal < 0) {
+        if (incrVal < 0)
+        {
             *incrTbl = (short)((incrVal + 1) >> 1);
         }
-        else {
+        else
+        {
             *incrTbl = (short)(incrVal >> 1);
         }
 
         *curArray++ = 1;
         incrTbl++;
-    } while(++incrVal < 1258);
+    } while (++incrVal < 1258);
 
-    oddTbl  = &DecodeTable[0x279];
+    oddTbl = &DecodeTable[0x279];
     evenTbl = &DecodeTable[1];
 
     evenVal = 2;
@@ -270,7 +199,7 @@ static void InitDecodeTable(void) // 8002D468
         *evenTbl++ = (short)evenVal;
         evenVal += 2;
 
-    } while(oddVal < 1259);
+    } while (oddVal < 1259);
 
     tableVar01[0] = 0;
 
@@ -283,19 +212,19 @@ static void InitDecodeTable(void) // 8002D468
     tableVar01[2] = incrVal;
 
     incrVal += (1 << ShiftTable[2]);
-	tableVar01[8] = (incrVal - 1);
+    tableVar01[8] = (incrVal - 1);
     tableVar01[3] = incrVal;
 
     incrVal += (1 << ShiftTable[3]);
-	tableVar01[9] = (incrVal - 1);
+    tableVar01[9] = (incrVal - 1);
     tableVar01[4] = incrVal;
 
     incrVal += (1 << ShiftTable[4]);
-	tableVar01[10] = (incrVal - 1);
+    tableVar01[10] = (incrVal - 1);
     tableVar01[5] = incrVal;
 
     incrVal += (1 << ShiftTable[5]);
-	tableVar01[11] = (incrVal - 1);
+    tableVar01[11] = (incrVal - 1);
     tableVar01[12] = (incrVal - 1);
 
     tableVar01[13] = tableVar01[12] + 64;
@@ -308,8 +237,7 @@ static void InitDecodeTable(void) // 8002D468
 =
 ========================
 */
-
-static void CheckTable(int a0,int a1,int a2) // 8002D624
+static void CheckTable(int a0, int a1, int a2)
 {
     int i;
     int idByte1;
@@ -321,33 +249,37 @@ static void CheckTable(int a0,int a1,int a2) // 8002D624
 
     i = 0;
     evenTbl = &DecodeTable[0];
-    oddTbl  = &DecodeTable[0x278];
+    oddTbl = &DecodeTable[0x278];
     incrTbl = &DecodeTable[0x4F0];
 
     idByte1 = a0;
 
-    do {
+    do
+    {
         idByte2 = incrTbl[idByte1];
 
         array01[idByte2] = (array01[a1] + array01[a0]);
 
         a0 = idByte2;
 
-        if(idByte2 != 1) {
+        if (idByte2 != 1)
+        {
             idByte1 = incrTbl[idByte2];
             idByte2 = evenTbl[idByte1];
 
             a1 = idByte2;
 
-            if(a0 == idByte2) {
+            if (a0 == idByte2)
+            {
                 a1 = oddTbl[idByte1];
             }
         }
 
         idByte1 = a0;
-    }while(a0 != 1);
+    } while (a0 != 1);
 
-    if(array01[1] != 0x7D0) {
+    if (array01[1] != 0x7D0)
+    {
         return;
     }
 
@@ -362,7 +294,7 @@ static void CheckTable(int a0,int a1,int a2) // 8002D624
         curArray[0] >>= 1;
         curArray += 4;
         i += 4;
-    } while(i != 1256);
+    } while (i != 1256);
 }
 
 /*
@@ -372,8 +304,7 @@ static void CheckTable(int a0,int a1,int a2) // 8002D624
 =
 ========================
 */
-
-static void DecodeByte(int tblpos) // 8002D72C
+static void DecodeByte(int tblpos)
 {
     int incrIdx;
     int evenVal;
@@ -388,7 +319,7 @@ static void DecodeByte(int tblpos) // 8002D72C
     short *tmpIncrTbl;
 
     evenTbl = &DecodeTable[0];
-    oddTbl  = &DecodeTable[0x278];
+    oddTbl = &DecodeTable[0x278];
     incrTbl = &DecodeTable[0x4F0];
 
     idByte1 = (tblpos + 0x275);
@@ -399,10 +330,12 @@ static void DecodeByte(int tblpos) // 8002D72C
         tmpIncrTbl = &incrTbl[idByte1];
         idByte2 = *tmpIncrTbl;
 
-        if (idByte1 == evenTbl[idByte2]) {
+        if (idByte1 == evenTbl[idByte2])
+        {
             CheckTable(idByte1, oddTbl[idByte2], idByte1);
         }
-        else {
+        else
+        {
             CheckTable(idByte1, evenTbl[idByte2], idByte1);
         }
 
@@ -411,29 +344,35 @@ static void DecodeByte(int tblpos) // 8002D72C
             incrIdx = incrTbl[idByte2];
             evenVal = evenTbl[incrIdx];
 
-            if (idByte2 == evenVal) {
+            if (idByte2 == evenVal)
+            {
                 idByte3 = oddTbl[incrIdx];
             }
-            else {
+            else
+            {
                 idByte3 = evenVal;
             }
 
             if (array01[idByte3] < array01[idByte1])
             {
-                if (idByte2 == evenVal) {
+                if (idByte2 == evenVal)
+                {
                     oddTbl[incrIdx] = (short)idByte1;
                 }
-                else {
+                else
+                {
                     evenTbl[incrIdx] = (short)idByte1;
                 }
 
                 evenVal = evenTbl[idByte2];
 
-                if (idByte1 == evenVal) {
+                if (idByte1 == evenVal)
+                {
                     idByte4 = oddTbl[idByte2];
                     evenTbl[idByte2] = (short)idByte3;
                 }
-                else {
+                else
+                {
                     idByte4 = evenVal;
                     oddTbl[idByte2] = (short)idByte3;
                 }
@@ -461,8 +400,7 @@ static void DecodeByte(int tblpos) // 8002D72C
 =
 ========================
 */
-
-static int StartDecodeByte(void) // 8002D904
+static int StartDecodeByte(void)
 {
     int lookup;
     short *evenTbl;
@@ -471,14 +409,16 @@ static int StartDecodeByte(void) // 8002D904
     lookup = 1;
 
     evenTbl = &DecodeTable[0];
-    oddTbl  = &DecodeTable[0x278];
+    oddTbl = &DecodeTable[0x278];
 
-    while(lookup < 0x275)
+    while (lookup < 0x275)
     {
-        if(DecodeScan() == 0) {
+        if (DecodeScan() == 0)
+        {
             lookup = evenTbl[lookup];
         }
-        else {
+        else
+        {
             lookup = oddTbl[lookup];
         }
     }
@@ -492,246 +432,37 @@ static int StartDecodeByte(void) // 8002D904
 /*
 ========================
 =
-= L8002d990
-= unknown Function
-=
-========================
-*/
-
-void L8002d990(int arg0) // 8002D990
-{
-	int val;
-
-	val = ((allocPtr[(arg0 + 2) % tableVar01[13]] << 8) ^ (allocPtr[arg0] ^ (allocPtr[(arg0+1) % tableVar01[13]] << 4))) & 0x3fff;
-
-	if (PtrEvenTbl[val] == -1)
-	{
-		PtrOddTbl[val] = arg0;
-		PtrNumTbl1[arg0] = -1;
-	}
-	else
-	{
-		PtrNumTbl1[arg0] = PtrEvenTbl[val];
-		PtrNumTbl2[PtrEvenTbl[val]] = arg0;
-	}
-
-	PtrEvenTbl[val] = arg0;
-	PtrNumTbl2[arg0] = -1;
-}
-
-/*
-========================
-=
-= FUN_8002dad0
-= unknown Function
-=
-========================
-*/
-
-void FUN_8002dad0(int arg0) // 8002DAD0
-{
-	int val;
-
-	val = ((allocPtr[(arg0 + 2) % tableVar01[13]] << 8) ^ (allocPtr[arg0] ^ (allocPtr[(arg0+1) % tableVar01[13]] << 4))) & 0x3fff;
-
-	if (PtrEvenTbl[val] == PtrOddTbl[val])
-	{
-		PtrEvenTbl[val] = -1;
-	}
-	else
-	{
-		PtrNumTbl1[PtrNumTbl2[PtrOddTbl[val]]] = -1;
-		PtrOddTbl[val] = PtrNumTbl2[PtrOddTbl[val]];
-	}
-}
-
-/*
-========================
-=
-= FUN_8002dc0c
-= unknown Function
-=
-========================
-*/
-
-int FUN_8002dc0c(int start, int count) // 8002DC0C
-{
-    short sVar1;
-    int iVar2;
-    int iVar4;
-    int iVar5;
-    int iVar6;
-
-    int cnt;
-    int curr, next;
-
-    iVar4 = 0;
-    if (start == tableVar01[13]) {
-        start = 0;
-    }
-
-    sVar1 = PtrEvenTbl[(allocPtr[(start + 2) % tableVar01[13]] << 8 ^ allocPtr[start] ^ allocPtr[(start + 1) % tableVar01[13]] << 4) & 0x3fff];
-
-    iVar5 = 1;
-    do
-    {
-        iVar2 = (int)sVar1;
-        if ((iVar2 == -1) || (count < iVar5)) {
-            return iVar4;
-        }
-
-        if ((allocPtr[(start + iVar4) % tableVar01[13]]) ==
-            (allocPtr[(iVar2 + iVar4) % tableVar01[13]]))
-        {
-            cnt = 0;
-            if (allocPtr[start] == allocPtr[iVar2])
-            {
-                curr = start;
-                next = iVar2;
-
-                if(next != start)
-                {
-                    while (curr != tableVar01[15])
-                    {
-                        curr++;
-                        if (curr == tableVar01[13]) {
-                            curr = 0;
-                        }
-
-                        next++;
-                        if (next == tableVar01[13]) {
-                            next = 0;
-                        }
-
-                        cnt++;
-
-                        if (allocPtr[curr] != allocPtr[next])
-                            break;
-
-                        if (cnt >= 64)
-                            break;
-
-                        if (next == start)
-                            break;
-                    }
-                }
-            }
-
-            iVar6 = start - iVar2;
-            if (iVar6 < 0) {
-                iVar6 += tableVar01[13];
-            }
-
-            iVar6 -= cnt;
-            if (tableVar01[16] && (tableVar01[6]/*15*/ < iVar6)) {
-                return iVar4;
-            }
-
-            //if (((iVar4 < cnt) && (iVar6 <= tableVar01[12])) &&
-            //((3 < cnt || (iVar6 <= tableVar01[tableVar01[17] + 9]))))
-            if(iVar4 < cnt)
-            {
-                if(iVar6 <= tableVar01[12])
-                {
-                    if((cnt > 3) || (iVar6 <= tableVar01[tableVar01[17] + 9]))
-                    {
-                        iVar4 = cnt;
-                        tableVar01[14] = iVar6;
-                    }
-                }
-            }
-        }
-
-        sVar1 = PtrNumTbl1[iVar2];
-        iVar5++;
-    } while( true );
-}
-
-/*
-========================
-=
-= FUN_8002df14
-= unknown Function
-=
-========================
-*/
-
-void FUN_8002df14(void) // 8002DF14
-{
-    byte byte_val;
-
-    int i, j, k;
-    byte *curPtr;
-    byte *nextPtr;
-    byte *next2Ptr;
-
-    curPtr = &allocPtr[0];
-
-    k = 0;
-    j = 0;
-    i = 1;
-    do
-    {
-        nextPtr = &allocPtr[j];
-        if (curPtr[0] == 10)
-        {
-            j = i;
-            if(nextPtr[0] == curPtr[1])
-            {
-                next2Ptr = &allocPtr[i+1];
-                do
-                {
-                    nextPtr++;
-                    byte_val = *next2Ptr++;
-                    k++;
-                } while (*nextPtr == byte_val);
-            }
-        }
-        curPtr++;
-        i++;
-    } while (i != 67);
-
-    if (k >= 16)
-        tableVar01[16] = 1;
-}
-
-/*
-========================
-=
 = DecodeD64
 =
 = Exclusive Doom 64
 =
 ========================
 */
-
-void DecodeD64(unsigned char *input, unsigned char *output) // 8002DFA0
+void DecodeD64(unsigned char *input, unsigned char *output)
 {
     int copyPos, storePos;
-	int dec_byte, resc_byte;
-	int incrBit, copyCnt, shiftPos, j;
+    int dec_byte, resc_byte;
+    int incrBit, copyCnt, shiftPos, j;
 
-	//PRINTF_D2(WHITE, 0, 15, "DecodeD64");
+    InitDecodeTable();
 
-	InitDecodeTable();
-
-	OVERFLOW_READ = MAXINT;
+    OVERFLOW_READ = MAXINT;
     OVERFLOW_WRITE = MAXINT;
 
-	incrBit = 0;
+    incrBit = 0;
 
-	decoder.read = input;
-	decoder.readPos = input;
-	decoder.write = output;
-	decoder.writePos = output;
+    decoder.read = input;
+    decoder.readPos = input;
+    decoder.write = output;
+    decoder.writePos = output;
 
-	allocPtr = (byte *)Z_Alloc(tableVar01[13], PU_STATIC, NULL);
+    allocPtr = (byte *)Z_Alloc(tableVar01[13], PU_STATIC, NULL);
 
     dec_byte = StartDecodeByte();
 
-    while(dec_byte != 256)
+    while (dec_byte != 256)
     {
-        if(dec_byte < 256)
+        if (dec_byte < 256)
         {
             /* Decode the data directly using binary data code */
 
@@ -741,7 +472,8 @@ void DecodeD64(unsigned char *input, unsigned char *output) // 8002DFA0
             /* Resets the count once the memory limit is exceeded in allocPtr,
                 so to speak resets it at startup for reuse */
             incrBit += 1;
-            if(incrBit == tableVar01[13]) {
+            if (incrBit == tableVar01[13])
+            {
                 incrBit = 0;
             }
         }
@@ -756,7 +488,7 @@ void DecodeD64(unsigned char *input, unsigned char *output) // 8002DFA0
             shiftPos = (dec_byte + -257) / 62;
 
             /*  get a count number for data to copy */
-            copyCnt  = (dec_byte - (shiftPos * 62)) + -254;
+            copyCnt = (dec_byte - (shiftPos * 62)) + -254;
 
             /*  To start copying data, you receive a position number
                 that you must sum with the position of table tableVar01 */
@@ -766,13 +498,14 @@ void DecodeD64(unsigned char *input, unsigned char *output) // 8002DFA0
                 to start copying previously stored data */
             copyPos = incrBit - ((tableVar01[shiftPos] + resc_byte) + copyCnt);
 
-            if(copyPos < 0) {
+            if (copyPos < 0)
+            {
                 copyPos += tableVar01[13];
             }
 
             storePos = incrBit;
 
-            for(j = 0; j < copyCnt; j++)
+            for (j = 0; j < copyCnt; j++)
             {
                 /* write the copied data */
                 WriteOutput(allocPtr[copyPos]);
@@ -784,12 +517,14 @@ void DecodeD64(unsigned char *input, unsigned char *output) // 8002DFA0
                 copyPos++;  /* advance to next allocPtr memory block to copy */
 
                 /* reset the position of storePos once the memory limit is exceeded */
-                if(storePos == tableVar01[13]) {
+                if (storePos == tableVar01[13])
+                {
                     storePos = 0;
                 }
 
                 /* reset the position of copyPos once the memory limit is exceeded */
-                if(copyPos == tableVar01[13]) {
+                if (copyPos == tableVar01[13])
+                {
                     copyPos = 0;
                 }
             }
@@ -797,7 +532,8 @@ void DecodeD64(unsigned char *input, unsigned char *output) // 8002DFA0
             /* Resets the count once the memory limit is exceeded in allocPtr,
                 so to speak resets it at startup for reuse */
             incrBit += copyCnt;
-            if (incrBit >= tableVar01[13]) {
+            if (incrBit >= tableVar01[13])
+            {
                 incrBit -= tableVar01[13];
             }
         }
@@ -805,9 +541,7 @@ void DecodeD64(unsigned char *input, unsigned char *output) // 8002DFA0
         dec_byte = StartDecodeByte();
     }
 
-	Z_Free(allocPtr);
-
-	//PRINTF_D2(WHITE, 0, 21, "DecodeD64:End");
+    Z_Free(allocPtr);
 }
 
 /*
@@ -820,50 +554,52 @@ void DecodeD64(unsigned char *input, unsigned char *output) // 8002DFA0
 == == == == == == == == == ==
 */
 
-#define WINDOW_SIZE	4096
-#define LOOKAHEAD_SIZE	16
+#define WINDOW_SIZE 4096
+#define LOOKAHEAD_SIZE 16
+#define LENSHIFT 4 /* this must be log2(LOOKAHEAD_SIZE) */
 
-#define LENSHIFT 4		/* this must be log2(LOOKAHEAD_SIZE) */
-
-void DecodeJaguar(unsigned char *input, unsigned char *output) // 8002E1f4
+void DecodeJaguar(unsigned char *input, unsigned char *output)
 {
     int getidbyte = 0;
-	int len;
-	int pos;
-	int i;
-	unsigned char *source;
-	int idbyte = 0;
+    int len;
+    int pos;
+    int i;
+    unsigned char *source;
+    int idbyte = 0;
 
-	while (1)
-	{
-		/* get a new idbyte if necessary */
-		if (!getidbyte) idbyte = *input++;
-		getidbyte = (getidbyte + 1) & 7;
+    while (1)
+    {
+        /* get a new idbyte if necessary */
+        if (!getidbyte)
+        {
+            idbyte = *input++;
+        }
+        getidbyte = (getidbyte + 1) & 7;
 
-		if (idbyte & 1)
-		{
-			/* decompress */
-			pos = *input++ << LENSHIFT;
-			pos = pos | (*input >> LENSHIFT);
-			source = output - pos - 1;
-			len = (*input++ & 0xf) + 1;
-			if (len == 1) break;
-
-			//for (i = 0; i<len; i++)
-				//*output++ = *source++;
+        if (idbyte & 1)
+        {
+            /* decompress */
+            pos = *input++ << LENSHIFT;
+            pos = pos | (*input >> LENSHIFT);
+            source = output - pos - 1;
+            len = (*input++ & 0xf) + 1;
+            if (len == 1)
+            {
+                break;
+            }
 
             i = 0;
             if (len > 0)
             {
                 if ((len & 3))
                 {
-                    while(i != (len & 3))
+                    while (i != (len & 3))
                     {
                         *output++ = *source++;
                         i++;
                     }
                 }
-                while(i != len)
+                while (i != len)
                 {
                     output[0] = source[0];
                     output[1] = source[1];
@@ -874,12 +610,12 @@ void DecodeJaguar(unsigned char *input, unsigned char *output) // 8002E1f4
                     i += 4;
                 }
             }
-		}
-		else
+        }
+        else
         {
-			*output++ = *input++;
-		}
+            *output++ = *input++;
+        }
 
-		idbyte = idbyte >> 1;
-	}
+        idbyte = idbyte >> 1;
+    }
 }
